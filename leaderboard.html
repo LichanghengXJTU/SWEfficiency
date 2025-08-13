@@ -1,91 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSO Leaderboard - Software Optimization Benchmark</title>
-    <meta name="description" content="Complete leaderboard for GSO benchmark showing performance of leading SWE-Agents on software optimization tasks.">
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sweperf Leaderboard</title>
+  <meta name="description" content="Sweperf leaderboard with clean criteria switching and modern Harvard design."/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <a href="index.html" style="text-decoration: none; color: inherit;">
-                    <h1>GSO</h1>
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="index.html#overview">Overview</a>
-                <a href="leaderboard.html" class="active">Leaderboard</a>
-                <!-- <a href="index.html#dataset">Dataset</a> -->
-                <a href="index.html#analysis">Analysis</a>
-                <!-- <a href="index.html#citation">Citation</a> -->
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                    <span class="theme-icon"></span>
-                </button>
-            </div>
+  <div class="page-shell">
+    <!-- 顶部：左侧Logo+名称，右侧导航 -->
+    <header class="hero-header">
+      <div class="container-wide hero-header-inner">
+        <div class="brand-block">
+          <img class="brand-logo" src="assets/images/logo.png" alt="Harvard Edge Logo"/>
+          <div class="brand-text">
+            <div class="brand-name">Sweperf</div>
+          </div>
         </div>
-    </nav>
+        <nav class="nav-links">
+          <a href="index.html#overview">Overview</a>
+          <a href="leaderboard.html" class="active">Leaderboard</a>
+          <a href="NonLLM%20bench%20Design/public/index.html">Non-LLM Bench</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
 
     <main>
-        <section class="hero">
-            <div class="container">
-                <h1 class="hero-title">GSO Leaderboard</h1>
-            </div>
-        </section>
+      <div class="container-wide">
+        <div class="page-card">
+          <!-- 主内容：leaderboard 占据主要版面 -->
+                <section class="section">
+        <div class="container-wide">
+          <h1 class="section-title" style="text-align:center; font-size:42px; letter-spacing:-0.02em; margin:0 0 20px 0;">Sweperf Leaderboard</h1>
 
-        <section class="section">
-            <div class="container">
-                <div class="leaderboard-container">
-                    <div id="leaderboard-filters" class="leaderboard-filters-bar"></div>
-                    <div class="leaderboard-loading" id="leaderboard-loading">
-                        <div class="spinner"></div>
-                        <span>Loading leaderboard...</span>
-                    </div>
-                    <div class="leaderboard-table" id="leaderboard-table" style="display: none;">
-                        <!-- Leaderboard will be populated by JavaScript -->
-                    </div>
-                </div>
-                
-                <!-- Footnotes for metrics -->
-                <div class="leaderboard-footnotes">
-                    <p><strong>Opt@1:</strong> Estimator of fraction of tasks where a single attempt achieves ≥95% human speedup and passes correctness tests.</p>
-                    <p><strong>Opt@K:</strong> Estimator of fraction of tasks where at least one attempt among K tries achieves ≥95% human speedup and passes correctness tests. <a href="https://arxiv.org/pdf/2505.23671" target="_blank">See paper for details</a>.</p>
-                </div>
+          <!-- KPI 条 -->
+          <div class="kpi-strip" style="margin:25px 0 25px 0;">
+            <div class="kpi-pill"><span>Total Tasks</span><span class="val">tbu</span></div>
+            <div class="kpi-pill"><span>Models</span><span class="val">tbu</span></div>
+            <div class="kpi-pill"><span>Updated</span><span class="val">tbu</span></div>
+          </div>
+
+          <!-- 切换控件 -->
+          <div style="margin-bottom:25px; display:flex; align-items:center; gap:20px; justify-content:space-between; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div id="criteria-switcher" class="segmented-control" role="tablist" aria-label="Leaderboard criteria"></div>
             </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div id="leaderboard-model-wrap" style="position:relative; display:inline-block;">
+                <input id="leaderboard-model-filter" type="text" placeholder="Search model…" style="padding:8px 28px 8px 10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font: inherit;"/>
+                <span id="leaderboard-model-ghost" aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color: rgba(0,0,0,0.35); pointer-events:none; font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+                <button id="leaderboard-model-clear" type="button" aria-label="Clear" title="Clear" style="position:absolute; right:6px; top:50%; transform: translateY(-50%); background:transparent; border:0; cursor:pointer; color: rgba(0,0,0,0.45); font-size:16px; line-height:1;">×</button>
+              </div>
+              <select id="leaderboard-criteria-select" aria-label="Select criteria" style="padding:8px 10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font: inherit;"></select>
+            </div>
+          </div>
+
+          <!-- 加载态 -->
+          <div class="leaderboard-loading" id="leaderboard-loading">
+            <div class="spinner"></div>
+            <span>Loading leaderboard…</span>
+          </div>
+
+          <!-- 极简表格外观：去代码框壳，仅保留大表 -->
+          <div class="no-codeframe leaderboard-card fade-enter" id="leaderboard-card" style="display:none;">
+            <div id="leaderboard-table" class="leaderboard-table"></div>
+          </div>
+        </div>
+      </section>
+
+        <!-- Contribute 独立一栏（不放链接，后续讨论） -->
+        <section class="section">
+          <div class="container-wide">
+            <div class="contribute-card elevate">
+              <h3 style="margin:0 0 6px 0;">Contribute</h3>
+              <p class="muted" style="margin:0 0 10px 0;">If you would like to contribute to Sweperf, please consider our platform.</p>
+              <a class="btn btn-secondary" href="index.html#platforms" onclick="try{sessionStorage.setItem('gotoPlatforms','1')}catch(e){}">Go to Platforms</a>
+            </div>
+          </div>
         </section>
+        </div>
+      </div>
     </main>
 
+    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>GSO Benchmark</h3>
-                    <p>Challenging Software Optimization Tasks for Evaluating SWE-Agents</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Links</h3>
-                    <ul>
-                        <li><a href="https://github.com/gso-bench/gso">GitHub Repository</a></li>
-                        <li><a href="https://huggingface.co/datasets/manishs/gso">Dataset</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <p>manishs@berkeley.edu</p>
-                    <p>For questions, please open an issue on GitHub</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 GSO Benchmark. Released under MIT License.</p>
-            </div>
+      <div class="container-wide">
+        <div class="footer-bottom">
+          <p>&copy; Harvard Edge Computing Lab 2025, released under XXX License.</p>
+          <!-- TODO: Add License -->
         </div>
+      </div>
     </footer>
+  </div>
 
-    <script src="assets/script.js"></script>
+  <!-- 动态渲染脚本 -->
+  <script src="assets/leaderboard.js"></script>
 </body>
 </html>
+

@@ -1,0 +1,192 @@
+{
+  "examples": [
+    {
+      "id": "eg1",
+      "title": "Pass along detailed_exception arg in FITS unit parser",
+      "lang": "Python",
+      "meta": {
+        "task": "Pass along detailed_exception arg in FITS unit parser （PR astropy #12699）",
+        "instance_id": "astropy__astropy-12699",
+        "repo_url": "https://github.com/astropy/astropy/pull/12699",
+        "commit": "dd8ccdde27858d076b8dbb676364e520ca06f987"
+      },
+      "workload": "import timeit\nimport statistics\nimport astropy.units as u\n\n    def workload():\n        u.Unit('km/s', format='fits')\n\n    runtimes = timeit.repeat(workload, number=1, repeat=2000)\n\n    print(\"Mean:\", statistics.mean(runtimes[-1000:]))\n    print(\"Std Dev:\", statistics.stdev(runtimes[-1000:]))",
+      "humanPatch": "diff --git a/astropy/units/format/fits.py b/astropy/units/format/fits.py\nindex bc00430924..1d2946bd85 100644\n--- a/astropy/units/format/fits.py\n+++ b/astropy/units/format/fits.py\n@@ -98,7 +98,7 @@ class Fits(generic.Generic):\n \n     @classmethod\n     def _parse_unit(cls, unit, detailed_exception=True):\n-        cls._validate_unit(unit)\n+        cls._validate_unit(unit, detailed_exception=detailed_exception)\n         return cls._units[unit]\n \n     @classmethod\ndiff --git a/pyproject.toml b/pyproject.toml\nindex 7a3b85fc92..5096a34a58 100644\n--- a/pyproject.toml\n+++ b/pyproject.toml\n@@ -1,5 +1,6 @@\n [build-system]\n-requires = [\"setuptools\",\n+requires = [\"setuptools==68.0.0\",\n+            \"markupsafe==2.0.1\",\n             \"setuptools_scm>=6.2\",\n             \"wheel\",\n             \"cython==0.29.30\",\n",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {
+          "name": "Agent-X",
+          "status": "Success",
+          "llmPatch": "placeholder for model-specific patch (select a model)",
+          "analysis": "placeholder for analysis of selected model",
+          "criteriaScores": { "c1": "Pass", "c2": "-12.4%", "c3": "Pass" }
+        },
+        {
+          "name": "Agent-Y",
+          "status": "Failure",
+          "llmPatch": "placeholder for model-specific patch for Agent-Y",
+          "analysis": "placeholder analysis for Agent-Y",
+          "criteriaScores": { "c1": "Fail", "c2": "+2.1%" }
+        },
+        {
+          "name": "Agent-Z",
+          "status": "Untest",
+          "llmPatch": "placeholder llm patch for Agent-Z",
+          "analysis": "placeholder analysis for Agent-Z",
+          "criteriaScores": { "c1": "Untest", "c3": "Untest" }
+        },
+        {
+          "name": "Agent-W",
+          "status": "Untest",
+          "llmPatch": "placeholder llm patch for Agent-W",
+          "analysis": "placeholder analysis for Agent-W",
+          "criteriaScores": { "c1": "Untest", "c2": "Untest", "c3": "Untest" }
+        }
+      ]
+    },
+    {
+      "id": "eg2",
+      "title": "placeholder title of eg2",
+      "lang": "placeholder lang",
+      "meta": {
+        "task": "placeholder task（PR repo #id）",
+        "instance_id": "placeholder",
+        "repo_url": "#",
+        "commit": "placeholder"
+      },
+      "workload": "placeholder workload",
+      "humanPatch": "placeholder human patch",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {"name": "Agent-X", 
+        "status": "Untest", 
+        "llmPatch": "placeholder llm patch for eg2 Agent-X", 
+        "analysis": "placeholder analysis", 
+        "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}
+      },
+        {"name": "Agent-Y", 
+        "status": "Untest", 
+        "llmPatch": "placeholder llm patch for eg2 Agent-Y", 
+        "analysis": "placeholder analysis", 
+        "criteriaScores": {"c1": "Untest", "c2": "Untest"}
+      },
+        {"name": "Agent-Z",
+        "status": "Untest", 
+        "llmPatch": "placeholder llm patch for eg2 Agent-Z", 
+        "analysis": "placeholder analysis", 
+        "criteriaScores": {"c1": "Untest", "c3": "Untest"}
+      },
+        {"name": "Agent-W", 
+        "status": "Untest", 
+        "llmPatch": "placeholder llm patch for eg2 Agent-W", 
+        "analysis": "placeholder analysis", 
+        "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}
+      }
+      ]
+    },
+    {
+      "id": "eg3",
+      "title": "placeholder title of eg3",
+      "lang": "placeholder lang",
+      "meta": {
+        "task": "placeholder task（PR repo #id）",
+        "instance_id": "placeholder",
+        "repo_url": "#",
+        "commit": "placeholder"
+      },
+      "workload": "placeholder workload",
+      "humanPatch": "placeholder human patch",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {"name": "Agent-X", "status": "Untest", "llmPatch": "placeholder llm patch for eg3 Agent-X", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}},
+        {"name": "Agent-Y", "status": "Untest", "llmPatch": "placeholder llm patch for eg3 Agent-Y", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest"}},
+        {"name": "Agent-Z", "status": "Untest", "llmPatch": "placeholder llm patch for eg3 Agent-Z", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c3": "Untest"}},
+        {"name": "Agent-W", "status": "Untest", "llmPatch": "placeholder llm patch for eg3 Agent-W", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}}
+      ]
+    },
+    {
+      "id": "eg4",
+      "title": "placeholder title of eg4",
+      "lang": "placeholder lang",
+      "meta": {
+        "task": "placeholder task（PR repo #id）",
+        "instance_id": "placeholder",
+        "repo_url": "#",
+        "commit": "placeholder"
+      },
+      "workload": "placeholder workload",
+      "humanPatch": "placeholder human patch",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {"name": "Agent-X", "status": "Untest", "llmPatch": "placeholder llm patch for eg4 Agent-X", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}},
+        {"name": "Agent-Y", "status": "Untest", "llmPatch": "placeholder llm patch for eg4 Agent-Y", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest"}},
+        {"name": "Agent-Z", "status": "Untest", "llmPatch": "placeholder llm patch for eg4 Agent-Z", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c3": "Untest"}},
+        {"name": "Agent-W", "status": "Untest", "llmPatch": "placeholder llm patch for eg4 Agent-W", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}}
+      ]
+    },
+    {
+      "id": "eg5",
+      "title": "placeholder title of eg5",
+      "lang": "placeholder lang",
+      "meta": {
+        "task": "placeholder task（PR repo #id）",
+        "instance_id": "placeholder",
+        "repo_url": "#",
+        "commit": "placeholder"
+      },
+      "workload": "placeholder workload",
+      "humanPatch": "placeholder human patch",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {"name": "Agent-X", "status": "Untest", "llmPatch": "placeholder llm patch for eg5 Agent-X", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}},
+        {"name": "Agent-Y", "status": "Untest", "llmPatch": "placeholder llm patch for eg5 Agent-Y", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest"}},
+        {"name": "Agent-Z", "status": "Untest", "llmPatch": "placeholder llm patch for eg5 Agent-Z", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c3": "Untest"}},
+        {"name": "Agent-W", "status": "Untest", "llmPatch": "placeholder llm patch for eg5 Agent-W", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}}
+      ]
+    },
+    {
+      "id": "eg6",
+      "title": "placeholder title of eg6",
+      "lang": "placeholder lang",
+      "meta": {
+        "task": "placeholder task（PR repo #id）",
+        "instance_id": "placeholder",
+        "repo_url": "#",
+        "commit": "placeholder"
+      },
+      "workload": "placeholder workload",
+      "humanPatch": "placeholder human patch",
+      "criteriaList": [
+        {"id": "c1", "name": "c1"},
+        {"id": "c2", "name": "c2"},
+        {"id": "c3", "name": "c3"}
+      ],
+      "models": [
+        {"name": "Agent-X", "status": "Untest", "llmPatch": "placeholder llm patch for eg6 Agent-X", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}},
+        {"name": "Agent-Y", "status": "Untest", "llmPatch": "placeholder llm patch for eg6 Agent-Y", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest"}},
+        {"name": "Agent-Z", "status": "Untest", "llmPatch": "placeholder llm patch for eg6 Agent-Z", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c3": "Untest"}},
+        {"name": "Agent-W", "status": "Untest", "llmPatch": "placeholder llm patch for eg6 Agent-W", "analysis": "placeholder analysis", "criteriaScores": {"c1": "Untest", "c2": "Untest", "c3": "Untest"}}
+      ]
+    }
+  ]
+} 

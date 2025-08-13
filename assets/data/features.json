@@ -1,0 +1,16 @@
+{
+  "media": {
+    "basePath": "assets/images/features/",
+    "defaultRatio": 0.35,
+    "minSide": 120,
+    "maxSide": 400
+  },
+  "items": [
+    { "id": "f1", "title": "Feature 1", 
+    "body": "Placeholder description for feature 1.", 
+    "image": "placeholder_f1.png" },
+    { "id": "f2", "title": "Feature 2", "body": "Placeholder description for feature 2.", "image": "placeholder_f2.png" },
+    { "id": "f3", "title": "Feature 3", "body": "Placeholder description for feature 3.", "image": "placeholder_f3.png" },
+    { "id": "f4", "title": "Feature 4", "body": "Placeholder description for feature 4.", "image": "placeholder_f4.png" }
+  ]
+} 

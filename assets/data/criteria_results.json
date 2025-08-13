@@ -1,0 +1,19 @@
+{
+  "media": {
+    "criteriaBasePath": "assets/images/criteria/",
+    "resultsBasePath": "assets/images/results/",
+    "defaultRatio": 0.30,
+    "minSide": 180,
+    "maxSide": 320
+  },
+  "criteria": [
+    { "id": "c1", "label": "c1", "title": "Criterion c1", "body": "Criterion c1 details placeholder", "image": "placeholder_c1.png" },
+    { "id": "c2", "label": "c2", "title": "Criterion c2", "body": "Criterion c2 details placeholder", "image": "placeholder_c2.png" },
+    { "id": "c3", "label": "c3", "title": "Criterion c3", "body": "Criterion c3 details placeholder", "image": "placeholder_c3.png" }
+  ],
+  "results": [
+    { "id": "c1", "label": "c1", "title": "Result c1", "body": "Sweperf is great. I am the result of criterion c1.", "image": "placeholder_r1.png" },
+    { "id": "c2", "label": "c2", "title": "Result c2", "body": "Sweperf is great. I am the result of criterion c2.", "image": "placeholder_r2.png" },
+    { "id": "c3", "label": "c3", "title": "Result c3", "body": "Sweperf is great. I am the result of criterion c3.", "image": "placeholder_r3.png", "ratio": 0.22 }
+  ]
+} 

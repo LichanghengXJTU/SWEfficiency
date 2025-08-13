@@ -1,441 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GSO: Challenging Software Optimization Tasks for Evaluating SWE-Agents</title>
-    <meta name="description" content="GSO is a benchmark for evaluating language models' capabilities in developing high-performance software through challenging optimization tasks.">
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sweperf — Benchmarking Software Performance Improvements</title>
+  <meta name="description" content="Sweperf: a modern benchmark and website for evaluating software performance improvements by SWE agents."/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <h1>GSO</h1>
-            </div>
-            <div class="nav-links">
-                <a href="#overview">Overview</a>
-                <a href="leaderboard.html">Leaderboard</a>
-                <!-- <a href="#dataset">Dataset</a> -->
-                <a href="#analysis">Analysis</a>
-                <!-- <a href="#citation">Citation</a> -->
-                <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-                    <span class="theme-icon"></span>
-                </button>
-            </div>
+
+  <header class="hero-header">
+    <div class="container-wide hero-header-inner">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/images/logo.png" alt="Harvard Edge Logo"/>
+        <div class="brand-text">
+          <div class="brand-name">Sweperf</div>
         </div>
-    </nav>
+      </div>
+      <nav class="nav-links">
+        <a href="#overview" class="active">Overview</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="NonLLM%20bench%20Design/public/index.html">Non-LLM Bench</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-    <main>
-        <section class="hero">
-            <div class="container">
-                <h1 class="hero-title">GSO: Challenging Software Optimization Tasks for Evaluating SWE-Agents</h1>
-                <div class="hero-authors">Manish Shetty, Naman Jain, Jinjian Liu, Vijay Kethanaboyina, Koushik Sen, Ion Stoica</div>
-                <p class="hero-subtitle">A benchmark for evaluating language models' capabilities in developing high-performance software.</p>
-                <div class="hero-actions">
-                    <a href="https://github.com/gso-bench/gso" class="btn btn-primary">
-                        <span>GitHub</span>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M1 8a.5.5 0 0 1 .5-.5h10.793L9.146 4.354a.5.5 0 1 1 .708-.708l4.5 4.5a.5.5 0 0 1 0 .708l-4.5 4.5a.5.5 0 0 1-.708-.708L12.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                        </svg>
-                    </a>
-                    <a href="https://huggingface.co/datasets/gso-bench/gso" class="btn btn-secondary">
-                        <span>Dataset</span>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M1 8a.5.5 0 0 1 .5-.5h10.793L9.146 4.354a.5.5 0 1 1 .708-.708l4.5 4.5a.5.5 0 0 1 0 .708l-4.5 4.5a.5.5 0 0 1-.708-.708L12.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                        </svg>
-                    </a>
-                    <a href="https://arxiv.org/pdf/2505.23671" class="btn btn-secondary">
-                        <span>Paper</span>
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M1 8a.5.5 0 0 1 .5-.5h10.793L9.146 4.354a.5.5 0 1 1 .708-.708l4.5 4.5a.5.5 0 0 1 0 .708l-4.5 4.5a.5.5 0 0 1-.708-.708L12.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                        </svg>
-                    </a>
-                </div>
+  <main>
+    <div class="container-wide">
+      <div class="page-card flat">
+
+        <section class="section" style="padding-top: 8px;">
+      <div class="container-wide">
+            <div class="hero-headline floating">
+                             <div class="brand">Sweperf:</div>
+              <div class="desc">Evaluate performance improvements of human-written and LLM-generated patches on real-world tasks</div>
+              <div class="hero-surface" aria-hidden="true"></div>
+              <div class="cta-row">
+                <a href="https://github.com/your-org-or-user/your-sweperf-repo" class="btn btn-dark">GitHub<span class="arrow">→</span></a>
+                <a href="#" class="btn btn-crimson">Paper<span class="arrow">→</span></a>
+                <a href="#" class="btn btn-light">Dataset<span class="arrow">→</span></a>
+              </div>
             </div>
+          </div>
         </section>
 
-        <section id="overview" class="section">
-            <div class="container">
-                <!-- <h2>Overview</h2> -->
-                <div class="overview-content">
-                    <p>Developing high-performance software is a complex task that requires specialized expertise. 
-                        GSO (Global Software Optimization) is a benchmark for evaluating language models' capabilities 
-                        in developing high-performance software. We develop an automated pipeline that generates and executes 
-                        synthetic end-to-end performance tests to analyze repository commit histories.
-                    </p>
-                    <p>We identify <strong>102 challenging optimization tasks</strong> across <strong>10 codebases</strong>, 
-                        spanning diverse domains and programming languages. In each GSO task, an agent is provided with 
-                        a codebase and a performance test as a <i>precise specification</i>, and tasked to improve the runtime efficiency. 
-                        Evaluation involves measuring the correctness of the model-generated patch's and its performance 
-                        with respect to the expert developer commit that serves as a target.
-                    </p>
-                </div>
-                
-                <div class="figure-container">
-                    <div class="figure-image">
-                        <img src="assets/images/gso-task.svg" alt="GSO Task Overview" class="task-diagram">
-                    </div>
-                    <div class="figure-caption">
-                        <strong>Figure 1:</strong> Our automated pipeline generates performance tests and analyzes repository commit history to 
-                        identify real-world code optimization tasks. Each task consists of a codebase, build script, generated performance tests, 
-                        and an expert developer commit that is the performance target for the task.
-                    </div>
-                </div>
+        <!-- Our work -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="font-size:22px; margin:0 0 10px 0;">Our work</h3>
+            <div class="grid grid-12">
+              <div class="col-7 col-12-sm">
+                <div class="placeholder-mm md">Mind map placeholder</div>
+              </div>
+              <div class="col-5 col-12-sm">
+                <div class="placeholder lg">Placeholder</div>
+              </div>
             </div>
+          </div>
         </section>
 
-        <section id="dataset" class="section section-alt">
-            <div class="container">
-                <h2>Features</h2>
-                <div class="dataset-content">
-                    <div class="dataset-text">
-                        <h4>Long-Horizon Task</h4>
-                        <p>Beyond SWE, GSO requires identifying bottlenecks and planning optimization strategies over a long horizon.</p>
-
-                        <h4>Construction Methodology</h4>
-                        <p>Our automated execution-based framework generates performance tests and candidate tasks, which are then manually validated to ensure diversity, complexity, and resistance to model behaviours like reward hacking.</p>
-                        
-                        <h4>Precise Specification</h4>
-                        <p>Performance tests serve as precise, automated specifications that unambiguously (unlike GitHub issues) define optimization tasks for rigorous evaluation.</p>
-
-                        <h4>Substantial Multi-Language Changes</h4>
-                        <p>Tasks span <strong>5 languages</strong> across <strong>8 domains</strong>—~60% require non-Python edits—and oracle patches span multiple files/functions, demanding up to <strong>15× more edits</strong> than existing SWE benchmarks.</p>
-                    </div>
-                    <div class="dataset-figure">
-                        <div class="figure-container">
-                            <div class="figure-image">
-                                <img src="assets/images/bench_loc.png" alt="GSO benchmark comparison" class="analysis-figure">
-                            </div>
-                            <div class="figure-caption">
-                                <strong>Figure 2:</strong> GSO benchmark comparison showing much larger oracle code changes than existing benchmarks.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="analysis" class="section">
-            <div class="container">
-                <h2>Results</h2>
-                
-                <div class="analysis-section">
-                    <div class="analysis-item-horizontal">
-                        <div class="analysis-text">
-                            <h3>Opt@1</h3>
-                            <p>Our evaluation reveals that current SWE-Agents struggle significantly with software optimization tasks. Even the best performing model, <strong>Claude-4.0</strong>, achieves less than <strong>5% success rate</strong> on Opt@1, while GPT-4o fails completely at 0.0%.</p>
-                            
-                            <p>These results demonstrate that success on existing SWE benchmarks does not transfer to more challenging real-world software tasks requiring both algorithmic reasoning and engineering expertise. The performance gap highlights the substantial challenges in bridging algorithmic coding with systems-level optimization.</p>
-                            
-                            <!-- <p>When evaluating Opt₀@1 (correctness regardless of performance), Claude-4.0 achieves 70% while O4-Mini reaches 45%, showing that while models can often produce correct code, achieving human-level performance optimization remains extremely challenging.</p> -->
-                        </div>
-                        <div class="analysis-figure">
-                            <div class="figure-container">
-                                <div class="figure-image">
-                                    <img src="assets/images/model_comparison.png" alt="Model performance comparison across Opt@1 and Opt@10 metrics" class="analysis-figure">
-                                </div>
-                                <div class="figure-caption">
-                                    <strong>Figure 3:</strong> Opt@1 performance across models, with all models achieving less than 5% success rate.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analysis-section">
-                    <div class="analysis-item-full">
-                        <h3>Scaling Test-Time Compute</h3>
-                        <div class="scaling-layout">
-                            <div class="scaling-matrices">
-                                <div class="figure-container" style="margin: 0;">
-                                    <div class="figure-image">
-                                        <img src="assets/images/compute_matrix.o4-mini.png" alt="O4-Mini compute allocation matrix" class="analysis-figure">
-                                    </div>
-                                </div>
-                                <div class="figure-container" style="margin: 0;">
-                                    <div class="figure-image">
-                                        <img src="assets/images/compute_matrix.claude.png" alt="Claude compute allocation matrix" class="analysis-figure">
-                                    </div>
-                                </div>
-                                <div class="figure-caption">
-                                    <strong>Figure 4:</strong> Scaling test-time compute along two axes: (a) # rollouts (parallel) and (b) # steps per rollout (serial).
-                                    Results show parallel rollouts outperform extended single rollouts.
-                                </div>
-                            </div>
-                            <div class="scaling-comparison">
-                                <div class="figure-container" style="margin: 0;">
-                                    <div class="figure-image">
-                                        <img src="assets/images/opt_at_k_comparison.png" alt="Performance scaling comparison" class="analysis-figure">
-                                    </div>
-                                    <div class="figure-caption">
-                                        <strong>Figure 4:</strong> Opt@K performance with increasing rollouts, improving to 15% with diminishing returns beyond eight rollouts.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <p>Our experiments suggest that parallel compute (multiple rollouts) scales more efficiently than serial compute (more steps per rollout). 
-                            <!-- The left matrices show performance as a function of inference steps and parallel rollouts for O4-Mini and Claude-3.5, while the right chart shows Opt@K performance with increasing rollouts. -->
-                        With only 50 steps, 8 rollouts yields higher performance than 400 steps with a single rollout. Furthermore, Opt@K improves with more compute to 15%, with diminishing returns. 
-                        Despite these improvements, Opt@10 performance remains modest (under 20%) for both models, indicating fundamental limitations in current SWE-Agents.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="qualitative" class="section section-alt">
-            <div class="container">
-                <h2>Qualitative Analysis</h2>
-                <p class="section-subtitle">We further classify model failures to understand how SWE-Agents fail.</p>
-                
-                <div class="analysis-themes">
-                    <div class="theme-item">
-                        <div class="theme-header" data-theme="low-level">
-                            <span class="theme-title">1 Agents Struggle with Low-Level Code Changes</span>
-                            <span class="theme-toggle">+</span>
-                        </div>
-                        <div class="theme-content" id="low-level">
-                            <div class="theme-description">
-                                <strong>Description:</strong> Models perform best with high-level languages, with O4-Mini achieving 21% on Python tasks but dropping to 4% when C/C++ are involved.
-                            </div>
-                            <div class="theme-details">
-                                <strong>Why it matters:</strong> Production codebases have abstraction hierarchies, and operating at inappropriate levels contributes to 25-30% of agent failures. Models either avoid necessary low-level changes or make unnecessary ones.
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="theme-item">
-                        <div class="theme-header" data-theme="lazy">
-                            <span class="theme-title">2 Agents Favor Lazy Optimizations</span>
-                            <span class="theme-toggle">+</span>
-                        </div>
-                        <div class="theme-content" id="lazy">
-                            <div class="theme-description">
-                                <strong>Description:</strong> Agents consistently favor trivial code changes over substantial improvements, with O4-Mini exhibiting this behavior in 30% of trajectories.
-                            </div>
-                            <div class="theme-details">
-                                <strong>Why it matters:</strong> This includes spurious compiler flag modifications, input-specific fast paths, and bizarre overrides in __init__.py files instead of core algorithmic improvements.
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="theme-item">
-                        <div class="theme-header" data-theme="compute">
-                            <span class="theme-title">3 Agents Mismanage Compute Resources</span>
-                            <span class="theme-toggle">+</span>
-                        </div>
-                        <div class="theme-content" id="compute">
-                            <div class="theme-description">
-                                <strong>Description:</strong> 75% of trajectories terminate before 100 steps despite providing 200+ step budgets, showing systematic underutilization of available compute.
-                            </div>
-                            <div class="theme-details">
-                                <strong>Why it matters:</strong> Models show dichotomous exploration-exploitation behaviors - O4-Mini is explore-heavy without converging, while Claude-3.5-V2 is exploit-heavy with insufficient exploration of ideas.
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="theme-item">
-                        <div class="theme-header" data-theme="diagnosis">
-                            <span class="theme-title">4 Agents Misdiagnose Performance Bottlenecks</span>
-                            <span class="theme-toggle">+</span>
-                        </div>
-                        <div class="theme-content" id="diagnosis">
-                            <div class="theme-description">
-                                <strong>Description:</strong> Models frequently misidentify root causes of performance issues, implementing ineffective optimizations that ignore fundamental constraints.
-                            </div>
-                            <div class="theme-details">
-                                <strong>Why it matters:</strong> Examples include attempting to parallelize operations that are bound by Python's GIL, or concluding that "numpy operations are already optimized" after failed attempts.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="examples" class="section">
-            <div class="container">
-                <!-- <h2>Example Tasks</h2> -->
-                <p class="section-subtitle">Explore some examples of GSO tasks and model attempts.</p>
-                
-                <div class="examples-tabs">
-                    <div class="tab-buttons">
-                        <button class="tab-button" data-tab="success">Successful Optimization</button>
-                        <button class="tab-button active" data-tab="example-lazy">Lazy Optimization</button>
-                        <button class="tab-button" data-tab="simd">Semantic Bugs</button>
-                        <button class="tab-button" data-tab="compiler">Compiler Flag Twiddling</button>
-                    </div>
-                    
-                    <div class="tab-content">
-                        <div class="tab-panel" id="success">
-                            <div class="example-header-info">
-                                <h3>Pillow TIFF Frame Counting Optimization</h3>
-                                <div class="example-meta">
-                                    <span class="example-domain success">Success</span>
-                                    <span class="example-lang">Python + C</span>
-                                </div>
-                            </div>
-                            <div class="example-description">
-                                <p><strong>Task:</strong> Optimize Pillow's TIFF image handling for n_frames and is_animated properties.</p>
-                                <p><strong>Agent Approach:</strong> O4-Mini replaced inefficient frame-by-frame loading with direct binary traversal of TIFF's IFD pointers, reading only essential metadata. 
-                                The optimization reduced complexity from O(n²) to O(n) by skipping tag parsing and frame decompression entirely. It achieves a ~4.2x speedup on multi-frame TIFF processing
-                                </p>
-                            </div>
-                            <div class="example-code">
-                                <h4>Optimized Implementation</h4>
-                                <pre><code># Fast count IFD entries without decoding tags
-fp = self.fp
-orig_pos = fp.tell()
-endian = self.tag_v2._endian
-offset = self.__first
-count = 0
-while offset:
-    count += 1
-    fp.seek(offset)
-    entry_count_data = fp.read(2)
-    num_entries = struct.unpack(endian + "H", entry_count_data)[0]
-    # Skip entries and read next IFD offset
-    fp.seek(offset + 2 + num_entries * 12)
-    next_offset_data = fp.read(4)
-    offset = struct.unpack(endian + "L", next_offset_data)[0]
-self._n_frames = count</code></pre>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-panel active" id="example-lazy">
-                            <div class="example-header-info">
-                                <h3>NumPy ufunc.at Python Override</h3>
-                                <div class="example-meta">
-                                    <span class="example-domain failure">Failure</span>
-                                    <span class="example-lang">Python Override</span>
-                                </div>
-                            </div>
-                            <div class="example-description">
-                                <p><strong>Agent Approach:</strong> O4-Mini attempted to optimize NumPy's ufunc.at by creating a Python override in __init__.py instead of modifying the underlying C implementation.</p>
-                                <p><strong>Why it Failed:</strong> The agent avoided the required deeper C-level changes and instead tried to override with a Python function, completely missing the performance-critical ufunc layer. 
-                                    The human commit implemented proper C++ ufuncs with BLAS acceleration and optimized memory access patterns.</p>
-                                <p><strong>Lesson:</strong> Agents often resort to superficial Python-level patches when deep systems knowledge is required.</p>
-                            </div>
-                            <div class="example-code">
-                                <h4>Agent's Failed Approach (simplified)</h4>
-                                <pre><code># __init__.py
-# Monkey-patch ufunc.at for faster add/subtract operations
-_orig_ufunc_at = ufunc.at
-
-def _at_fast(self, a, indices, values=None):
-    ...
-    # Only optimize for 1D numpy arrays
-    if name in ('add', 'subtract') and isinstance(a, np.ndarray) and a.ndim == 1:
-        # Use np.bincount for optimization
-        return np.bincount(indices, weights=values, minlength=len(a))
-    ...
-    return _orig_ufunc_at(self, a, indices, values)
-
-ufunc.at = _at_fast</code></pre>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-panel" id="simd">
-                            <div class="example-header-info">
-                                <h3>SIMD Segmentation Fault</h3>
-                                <div class="example-meta">
-                                    <span class="example-domain failure">Failure</span>
-                                    <span class="example-lang">C + SIMD</span>
-                                </div>
-                            </div>
-                            <div class="example-description">
-                                <p><strong>Agent Approach:</strong> Claude-3.5-V2 attempted to optimize Pillow's image reduction with AVX2 SIMD vectorization and OpenMP parallelization.</p>
-                                <p><strong>Why it Failed:</strong> The implementation had unsafe memory access patterns at image boundaries and inconsistent function interfaces, causing segmentation faults. The developer commit uses careful hand-crafted SIMD with proper boundary handling and data alignment.</p>
-                                <p><strong>Lesson:</strong> Low-level SIMD programming requires precise memory management that current models struggle with.</p>
-                            </div>
-                            <div class="example-code">
-                                <h4>Error Output</h4>
-                                <pre><code>timeout: the monitored command dumped core
-/eval.sh: line 53: 973 Segmentation fault timeout 300s python "$test_file"
-
-# Agent added unsafe AVX2 vectorization:
-+ Added vectorized pixel processing (8 pixels at once)
-+ Added edge case handling code  
-+ Added function pointers for different reduction strategies
-- Removed redundant code in specialized reduction functions</code></pre>
-                            </div>
-                        </div>
-                        
-                        <div class="tab-panel" id="compiler">
-                            <div class="example-header-info">
-                                <h3>Spurious Compiler Flag Optimization</h3>
-                                <div class="example-meta">
-                                    <span class="example-domain failure">Failure</span>
-                                    <span class="example-lang">Build System</span>
-                                </div>
-                            </div>
-                            <div class="example-description">
-                                <p><strong>Agent Approach:</strong> O4-mini attempted to optimize Pillow's alpha compositing by simply adding -O3 and -mavx2 compiler flags to setup.py.</p>
-                                <p><strong>Why it Failed:</strong> The Pillow project already uses optimized builds by default. This approach shows fundamental misunderstanding of real-world project configurations. 
-                                On the other hand, the ground-truth commit hand-crafted AVX2 and SSE4 intrinsics with specialized shuffle masks and tiered fallback approach.</p>
-                                <p><strong>Lesson:</strong> Agents often attempt trivial build-system changes instead of real algorithmic improvements.</p>
-                            </div>
-                            <div class="example-code">
-                                <h4>Agent's Naive Change</h4>
-                                <pre><code>ext_modules = [
--    Extension("PIL._imaging", files, extra_compile_args=["-msse4"]),
-+    Extension("PIL._imaging", files, extra_compile_args=["-mavx2", "-O3"]),
-    Extension("PIL._imagingft", ["src/_imagingft.c"]),
-    Extension("PIL._imagingcms", ["src/_imagingcms.c"]),
-    Extension("PIL._webp", ["src/_webp.c"]),
-]</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- <section id="citation" class="section section-alt">
-            <div class="container">
-                <h2>Citation</h2>
-                <p>If you use GSO in your research, please cite our paper:</p>
-                <div class="citation-block">
-                    <pre><code>@article{shetty2024gso,
-  title={GSO: Challenging Software Optimization Tasks for Evaluating SWE-Agents},
-  author={Shetty, Manish and Jain, Naman and Liu, Jinjian and Kethanaboyina, Vijay and Sen, Koushik and Stoica, Ion},
-  journal={arXiv preprint arXiv:2024.xxxxx},
-  year={2024}
-}</code></pre>
-                    <button class="copy-btn" onclick="copyToClipboard(this)">Copy Citation</button>
-                </div>
-            </div>
-        </section> -->
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>GSO Benchmark</h3>
-                    <p>Challenging Software Optimization Tasks for Evaluating SWE-Agents</p>
-                </div>
-                <div class="footer-section">
-                    <h3>Links</h3>
-                    <ul>
-                        <li><a href="https://github.com/gso-bench/gso">GitHub Repository</a></li>
-                        <li><a href="https://huggingface.co/datasets/gso-bench/gso">Dataset</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <p>manishs@berkeley.edu</p>
-                    <p>For questions, please open an issue on GitHub</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 GSO Benchmark. Released under MIT License.</p>
-            </div>
+        <!-- Performance, Measured. -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 6px 0;">Performance, Measured.</h3>
+            <div class="divider"></div>
+            <div class="kpi-row">
+              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Tasks</div></div>
+              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Agents / Models</div></div>
+              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Best Mean Speedup</div></div>
+              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Best Pass Rate</div></div>
         </div>
-    </footer>
+      </div>
+    </section>
 
-    <script src="assets/script.js"></script>
+        <!-- Features -->
+        <section class="section">
+      <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Features</h3>
+        <div class="grid grid-12 features-grid">
+              <div class="col-3 col-12-sm"><div class="flat-card"></div></div>
+              <div class="col-3 col-12-sm"><div class="flat-card"></div></div>
+              <div class="col-3 col-12-sm"><div class="flat-card"></div></div>
+              <div class="col-3 col-12-sm"><div class="flat-card"></div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Criteria with 3D Deck -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Criteria</h3>
+            <div class="tabbar" id="criteria-tabs"></div>
+            <div class="results-deck" id="criteria-deck"></div>
+          </div>
+        </section>
+
+        <!-- Results: 可切换卡片 -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Results</h3>
+            <div class="tabbar" id="results-tabs"></div>
+            <div class="tab-panels" id="results-panels">
+              <div class="results-deck" id="results-deck"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analysis：动态渲染（assets/analysis.js + assets/data/analysis.json） -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Analysis</h3>
+            <div class="analysis-list" id="analysis-list"></div>
+          </div>
+        </section>
+
+        <!-- Examples：五张可翻转的大卡片（与 Criteria/Results 一致） -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Examples</h3>
+            <div class="tabbar" id="examples-tabs"></div>
+            <div class="results-deck" id="examples-deck"></div>
+          </div>
+        </section>
+
+        <!-- Run Sweperf -->
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Run Sweperf</h3>
+            <div class="grid grid-12" style="gap:10px;">
+              <div class="col-6 col-12-sm">
+                <div class="flat-card placeholder sm">placeholder</div>
+              </div>
+              <div class="col-6 col-12-sm">
+                <div class="meta" style="margin-bottom:6px;"></div>
+                <pre class="codebox auto"><code>placeholder line 1
+placeholder line 2</code></pre>
+                <div class="meta" style="margin:10px 0 6px 0;"></div>
+                <pre class="codebox auto"><code>placeholder line 1
+placeholder line 2
+placeholder line 3</code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Platforms（后续设计） -->
+    <section class="section" id="platforms">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">Platforms</h3>
+            <div class="placeholder md">tbu</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer id="contact" class="footer">
+    <div class="container-wide">
+      <div class="footer-bottom">
+        <p>&copy; Harvard Edge Computing Lab 2025, released under XXX License.</p>
+        <!-- TODO: Add License -->
+      </div>
+    </div>
+  </footer>
+  <script src="assets/leaderboard.js"></script>
+  <script src="assets/example.js"></script>
+  <script src="assets/criteria_results.js"></script>
+  <script src="assets/features.js"></script>
+  <script src="assets/analysis.js"></script>
+  <script src="assets/anchor_scroll.js"></script>
 </body>
 </html>
+
