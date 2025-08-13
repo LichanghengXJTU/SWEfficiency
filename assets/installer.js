@@ -2,8 +2,7 @@
 (() => {
   "use strict";
   const ENDPOINT = 'https://127.0.0.1:5050';
-  const base = window.location.origin + (window.location.pathname.replace(/\/[^/]*$/, ''));
-  const dlBase = base + 'nonllmplatform/downloadhelper/';
+  const dlBase = new URL('nonllmplatform/downloadhelper/', window.location.href).toString();
 
   const $ = (sel) => document.querySelector(sel);
 
