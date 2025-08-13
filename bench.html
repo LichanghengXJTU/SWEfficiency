@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sweperf — Non-LLM Bench Platform</title>
+  <meta name="description" content="Sweperf Non-LLM bench: run local pipeline via a companion helper with Docker checks and submissions."/>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <header class="hero-header">
+    <div class="container-wide hero-header-inner">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/images/logo.png" alt="Harvard Edge Logo"/>
+        <div class="brand-text">
+          <div class="brand-name">Sweperf</div>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="bench.html" class="active">Non-LLM Bench</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container-wide">
+      <div class="page-card flat">
+        <section class="section" style="padding-top:8px;">
+          <div class="container-wide">
+            <h1 class="section-title" style="margin:0 0 10px 0;">Non-LLM Bench Platform</h1>
+            <div class="divider"></div>
+            <p class="meta" style="margin:6px 0 0 0;">Run the non-LLM pipeline locally via a companion helper server. This page connects to your local helper on <code>http://localhost:5050</code> to check Docker and run the pipeline.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">1. Local Helper</h3>
+            <div class="grid grid-12" style="gap:10px;">
+              <div class="col-7 col-12-sm">
+                <div class="flat-card">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div class="meta">Connection</div>
+                    <div id="helper-status" class="status-pill">Unknown</div>
+                  </div>
+                  <div class="meta" style="margin-top:6px;">Endpoint: <code id="helper-endpoint">http://localhost:5050</code></div>
+                  <div class="meta" style="margin-top:8px;">
+                    If the helper is not running, start it locally (choose one):
+                    <ul style="margin:6px 0 0 16px;">
+                      <li>Python (recommended): <code>python3 "NonLLM bench Design/backend.py" --port 5050</code></li>
+                      <li>Or run your existing local backend exposing:<br/>GET <code>/api/health</code> · GET <code>/api/docker/check</code> · POST <code>/api/run</code> · POST <code>/api/submit</code></li>
+                    </ul>
+                  </div>
+                  <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="btn btn-secondary" id="btn-retry">Retry</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-5 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Health log</div>
+                  <pre class="codebox auto" id="health-log"><code>waiting for connection...</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">2. Docker Check</h3>
+            <div class="grid grid-12" style="gap:10px;">
+              <div class="col-7 col-12-sm">
+                <div class="flat-card">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div class="meta">Verify Docker availability</div>
+                    <div id="docker-status" class="status-pill">Untest</div>
+                  </div>
+                  <div class="meta" style="margin-top:6px;">This runs locally via the helper (no data leaves your machine).</div>
+                  <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="btn btn-secondary" id="btn-docker">Check Docker</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-5 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Docker check output</div>
+                  <pre class="codebox auto" id="docker-log"><code>waiting...</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">3. Run Pipeline</h3>
+            <div class="grid grid-12" style="gap:10px;">
+              <div class="col-7 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Task configuration</div>
+                  <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+                    <label class="meta">Repository URL
+                      <input id="repo-url" type="text" placeholder="https://github.com/owner/repo" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    </label>
+                    <label class="meta">Target commit (optional)
+                      <input id="commit-sha" type="text" placeholder="commit sha" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    </label>
+                    <label class="meta">Test command (optional)
+                      <input id="test-cmd" type="text" placeholder="e.g. pytest -q" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    </label>
+                  </div>
+                  <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="btn btn-secondary" id="btn-run">Run</button>
+                    <button class="btn btn-tertiary" id="btn-cancel">Cancel</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-5 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Run logs</div>
+                  <pre class="codebox auto" id="run-log"><code>idle</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="container-wide">
+            <h3 class="section-title" style="margin:0 0 10px 0;">4. Submit (optional)</h3>
+            <div class="grid grid-12" style="gap:10px;">
+              <div class="col-7 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Record your metadata locally (helper only)</div>
+                  <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+                    <label class="meta">Email (optional)
+                      <input id="user-email" type="email" placeholder="email@example.com" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    </label>
+                    <label class="meta">Notes
+                      <textarea id="user-notes" rows="4" placeholder="your notes..." style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"></textarea>
+                    </label>
+                  </div>
+                  <div style="margin-top:10px; display:flex; gap:10px;">
+                    <button class="btn btn-secondary" id="btn-submit">Submit</button>
+                  </div>
+                </div>
+              </div>
+              <div class="col-5 col-12-sm">
+                <div class="flat-card">
+                  <div class="meta">Submit output</div>
+                  <pre class="codebox auto" id="submit-log"><code>waiting...</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container-wide">
+      <div class="footer-bottom">
+        <p>&copy; Harvard Edge Computing Lab 2025, released under XXX License.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/bench.js"></script>
+</body>
+</html> 
