@@ -65,7 +65,7 @@ def health(request: Request):
 def docker_check(request: Request):
     check_origin(request)
     try:
-        cp = run_cmd("docker version --format {{json .}}", timeout=20)
+        cp = run_cmd("docker version --format '{{json .}}'", timeout=20)
         out = cp.stdout.decode("utf-8", "ignore")
         available = (cp.returncode == 0)
         return {"available": available, "output": out}
