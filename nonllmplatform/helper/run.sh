@@ -5,7 +5,7 @@ set -euo pipefail
 PORT="${PORT:-5050}"
 HOST="127.0.0.1"
 ROOT="${SWEP_WORK_ROOT:-$HOME/SweperfWork}"
-ALLOWED="${SWEP_ALLOWED_ORIGINS:-https://<your-username>.github.io,http://localhost:8000}"
+ALLOWED="${SWEP_ALLOWED_ORIGINS:-https://lichanghengxjtu.github.io,http://localhost:8000}"
 CERT="$HOME/.sweperf/certs/localhost.pem"
 KEY="$HOME/.sweperf/certs/localhost-key.pem"
 

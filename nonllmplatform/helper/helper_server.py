@@ -13,7 +13,7 @@ def env_list(name: str, default: List[str]) -> List[str]:
     return [s.strip() for s in v.split(",") if s.strip()]
 
 ALLOWED_ORIGINS = env_list("SWEP_ALLOWED_ORIGINS", [
-    "https://lichanghengxjtu.github.io/Swep/#",   # 替换为你的 Pages 域
+    "https://lichanghengxjtu.github.io",   # Pages 域（不含路径）
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ])
