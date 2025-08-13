@@ -16,6 +16,8 @@ CERT_PEM="$CERT_DIR/localhost.pem"
 KEY_PEM="$CERT_DIR/localhost-key.pem"
 PORT="${PORT:-5050}"
 ALLOWED_ORIGINS_DEFAULT="https://lichanghengxjtu.github.io,http://localhost:8000"
+REMOTE_BASE_DEFAULT="https://lichanghengxjtu.github.io/SWEf/nonllmplatform/helper"
+REMOTE_BASE="${SWEF_HELPER_BASE:-$REMOTE_BASE_DEFAULT}"
 
 log(){ printf "[install] %s\n" "$*"; }
 warn(){ printf "[warn] %s\n" "$*"; }
@@ -25,15 +27,27 @@ require_macos(){
   if [[ "$(uname -s)" != "Darwin" ]]; then err "This installer supports macOS only"; exit 1; fi
 }
 
+bootstrap_helper_from_remote(){
+  # If local helper layout missing, fetch from published site into ~/.sweperf/helper
+  local target_dir="$HOME/.sweperf/helper"
+  log "Bootstrapping helper files into $target_dir from $REMOTE_BASE"
+  mkdir -p "$target_dir/plist"
+  curl -fsSL "$REMOTE_BASE/helper_server.py" -o "$target_dir/helper_server.py"
+  curl -fsSL "$REMOTE_BASE/requirements.txt" -o "$target_dir/requirements.txt"
+  curl -fsSL "$REMOTE_BASE/run.sh" -o "$target_dir/run.sh"
+  # plist may or may not exist remotely; try fetch, tolerate 404
+  curl -fsSL "$REMOTE_BASE/plist/com.sweperf.helper.plist" -o "$target_dir/plist/com.sweperf.helper.plist" || true
+  chmod +x "$target_dir/run.sh" || true
+  HELPER_DIR="$target_dir"
+}
+
 ensure_helper_layout(){
-  if [[ ! -d "$HELPER_DIR" ]]; then
-    err "Helper directory not found: $HELPER_DIR"; exit 1
+  # If helper directory not present or missing required files, bootstrap from remote
+  if [[ ! -d "$HELPER_DIR" ]] || [[ ! -f "$HELPER_DIR/run.sh" ]] || [[ ! -f "$HELPER_DIR/requirements.txt" ]]; then
+    bootstrap_helper_from_remote
   fi
-  if [[ ! -f "$HELPER_DIR/run.sh" ]]; then
-    err "Missing $HELPER_DIR/run.sh"; exit 1
-  fi
-  if [[ ! -f "$HELPER_DIR/requirements.txt" ]]; then
-    err "Missing $HELPER_DIR/requirements.txt"; exit 1
+  if [[ ! -f "$HELPER_DIR/run.sh" ]] || [[ ! -f "$HELPER_DIR/requirements.txt" ]]; then
+    err "Helper files missing and bootstrap failed. Please ensure $REMOTE_BASE is accessible."; exit 1
   fi
 }
 
@@ -152,6 +166,7 @@ main(){
   reload_launchagent
   verify
   log "Done. If the browser warns about certificate, visit https://127.0.0.1:$PORT/api/health once to establish trust."
+  log "Helper files are located at: $HELPER_DIR"
 }
 
 main "$@" 

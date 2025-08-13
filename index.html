@@ -157,13 +157,12 @@ placeholder line 3</code></pre>
               <div class="col-7 col-12-sm">
                 <div class="flat-card">
                   <h4 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Install Local Helper</h4>
-                  <div id="helper-install-status" class="meta">Checking local helper status...</div>
-                  <div class="meta" style="margin-top:8px;">After installation, please go to <a href="bench.html">Non-LLM Bench</a> to check and run Docker.</div>
-                  <div class="cta-row" style="gap:8px; flex-wrap:wrap; margin-top:8px;">
-                    <a class="btn btn-dark" href="nonllmplatform/downloadhelper/install.command" download>Download Install Command</a>
-                    <a class="btn" href="nonllmplatform/downloadhelper/install_helper.sh" download>Download Install Script</a>
-                    <a class="btn btn-light" href="nonllmplatform/downloadhelper/README.md" target="_blank" rel="noopener">Check Installation Guide</a>
-                  </div>
+                  <div id="helper-install-status" class="meta">Detecting local Helper…</div>
+                  <div class="meta" style="margin-top:8px;">After installation, go to <a href="bench.html">Non‑LLM Bench</a> to run Docker checks.</div>
+                  <div class="meta" style="margin-top:10px; font-weight:600;">Online install (copy and run in Terminal):</div>
+                  <pre class="codebox auto"><code>/bin/bash -c "$(curl -fsSL https://lichanghengxjtu.github.io/SWEf/nonllmplatform/downloadhelper/install_helper.sh)"</code></pre>
+                  <div class="meta" style="margin-top:10px; font-weight:600;">Online uninstall:</div>
+                  <pre class="codebox auto"><code>launchctl bootout gui/$(id -u)/com.sweperf.helper || true && rm -f ~/Library/LaunchAgents/com.sweperf.helper.plist && rm -rf ~/.sweperf ~/SweperfWork</code></pre>
                 </div>
               </div>
               <div class="col-5 col-12-sm">
