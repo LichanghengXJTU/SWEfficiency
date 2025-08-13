@@ -87,6 +87,11 @@ ensure_tls_cert(){
       warn "Failed to add trusted cert automatically. You may need to open Keychain Access and trust $CERT_PEM manually.";
     }
   fi
+  # Also trust in System keychain for broader acceptance
+  if ! security find-certificate -c "localhost" "/Library/Keychains/System.keychain" >/dev/null 2>&1; then
+    log "Trusting certificate in System keychain (requires admin)..."
+    sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" "$CERT_PEM" || true
+  fi
 }
 
 setup_venv(){
@@ -165,6 +170,8 @@ main(){
   write_launchagent
   reload_launchagent
   verify
+  # Open health page once to finalize browser trust
+  open "https://127.0.0.1:$PORT/api/health" || true
   log "Done. If the browser warns about certificate, visit https://127.0.0.1:$PORT/api/health once to establish trust."
   log "Helper files are located at: $HELPER_DIR"
 }
