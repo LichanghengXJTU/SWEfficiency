@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  const ENDPOINT = 'http://localhost:5050';
+  const ENDPOINT = 'https://127.0.0.1:5050';
   const $ = (id) => document.getElementById(id);
   const log = (el, msg) => { if (el) el.textContent = String(msg); };
   const setStatus = (el, text, cls=[]) => {
