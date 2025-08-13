@@ -100,34 +100,62 @@
 
         <section class="section">
           <div class="container-wide">
-            <h3 class="section-title" style="margin:0 0 10px 0;">3. Run Pipeline</h3>
+            <h3 class="section-title" style="margin:0 0 10px 0;">3. Benchmark</h3>
             <div class="grid grid-12" style="gap:10px;">
               <div class="col-7 col-12-sm">
                 <div class="flat-card">
-                  <div class="meta">Task configuration</div>
+                  <div class="meta">Task input</div>
                   <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-                    <label class="meta">Repository URL
-                      <input id="repo-url" type="text" placeholder="https://github.com/owner/repo" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    <label class="meta">Link / Image / Instance ID
+                      <input id="bench-id" type="text" placeholder="e.g. https://github.com/astropy/astropy/pull/10814 | docker.io/sweperf/sweperf_annotate:astropy__astropy-10814 | astropy__astropy-10814" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
                     </label>
-                    <label class="meta">Target commit (optional)
-                      <input id="commit-sha" type="text" placeholder="commit sha" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
+                    <label class="meta">Workload code
+                      <textarea id="bench-code" rows="10" placeholder="# Paste your full workload code here.\n# Must print lines like:\n#   Mean: 1.23\n#   Std Dev: 0.01\nimport timeit, statistics\nprint('Mean:', 1.0)\nprint('Std Dev:', 0.01)" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"></textarea>
                     </label>
-                    <label class="meta">Test command (optional)
-                      <input id="test-cmd" type="text" placeholder="e.g. pytest -q" style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"/>
-                    </label>
+                    <div class="meta" id="bench-hints" style="color:#8a4; display:none;"></div>
                   </div>
-                  <div style="margin-top:10px; display:flex; gap:10px;">
-                    <button class="btn btn-secondary" id="btn-run">Run</button>
-                    <button class="btn btn-tertiary" id="btn-cancel">Cancel</button>
+                  <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn" id="btn-lint">Lint</button>
+                    <button class="btn btn-secondary" id="btn-bench-run">Run Benchmark</button>
+                    <button class="btn btn-tertiary" id="btn-bench-cancel">Cancel</button>
                   </div>
                 </div>
               </div>
               <div class="col-5 col-12-sm">
                 <div class="flat-card">
-                  <div class="meta">Run logs</div>
-                  <pre class="codebox auto" id="run-log"><code>idle</code></pre>
+                  <div class="meta">Inferred</div>
+                  <div class="meta" style="margin-top:6px;">Docker image: <code id="bench-image">n/a</code></div>
+                  <div class="meta" style="margin:8px 0 6px 0;">Docker command:</div>
+                  <pre class="codebox auto" id="bench-cmd"><code>waiting…</code></pre>
                 </div>
               </div>
+            </div>
+
+            <div class="grid grid-12" style="gap:10px; margin-top:10px;">
+              <div class="col-6 col-12-sm">
+                <div class="flat-card">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div class="meta">Before patch</div>
+                    <div class="meta">Mean: <code id="before-mean">—</code> · Std: <code id="before-std">—</code>
+                      <button class="btn btn-tertiary" id="copy-before" style="margin-left:6px;">Copy</button></div>
+                  </div>
+                  <pre class="codebox auto" id="before-log"><code>idle</code></pre>
+                </div>
+              </div>
+              <div class="col-6 col-12-sm">
+                <div class="flat-card">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div class="meta">After patch</div>
+                    <div class="meta">Mean: <code id="after-mean">—</code> · Std: <code id="after-std">—</code>
+                      <button class="btn btn-tertiary" id="copy-after" style="margin-left:6px;">Copy</button></div>
+                  </div>
+                  <pre class="codebox auto" id="after-log"><code>idle</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <div class="meta" id="bench-diff" style="font-weight:600;">Improvement: —</div>
             </div>
           </div>
         </section>

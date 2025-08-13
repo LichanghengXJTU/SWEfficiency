@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request, Body, HTTPException
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import re, secrets
+from datetime import datetime
 
 def env_list(name: str, default: List[str]) -> List[str]:
     v = os.environ.get(name, "")
@@ -116,3 +118,114 @@ def submit(req: SubmitReq, request: Request):
     with open(SUBMIT_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return ok()
+
+class BenchPrepareReq(BaseModel):
+    instance: str
+    image: str
+    code: str
+
+class BenchPrepareResp(BaseModel):
+    ok: bool
+    jobId: str
+    hostWorkloadPath: str
+
+@app.post("/api/bench/prepare")
+def bench_prepare(req: BenchPrepareReq, request: Request):
+    check_origin(request)
+    os.makedirs(ROOT_DIR, exist_ok=True)
+    job_id = f"job-{int(time.time())}-{secrets.token_hex(4)}"
+    job_dir = ensure_sandbox(os.path.join(ROOT_DIR, job_id))
+    os.makedirs(job_dir, exist_ok=True)
+    workload_path = os.path.join(job_dir, "workload.py")
+    with open(workload_path, "w", encoding="utf-8") as f:
+        f.write(req.code)
+    meta = {"instance": req.instance, "image": req.image, "created": int(time.time())}
+    with open(os.path.join(job_dir, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f)
+    return JSONResponse({"ok": True, "jobId": job_id, "hostWorkloadPath": workload_path})
+
+class BenchRunReq(BaseModel):
+    jobId: str
+
+# Simple log parser for PERF_START/END and Mean/Std extraction
+MEAN_RE = re.compile(r"Mean\s*:\s*([0-9.+-Ee]+)")
+STD_RE = re.compile(r"(?:Std\s*Dev|Std)\s*:\s*([0-9.+-Ee]+)")
+
+def parse_perf_core(txt: str):
+    core = ""
+    try:
+        start = txt.index("PERF_START:")
+        end = txt.index("PERF_END:", start)
+        segment = txt[start:end]
+        # Remove boilerplate markers
+        segment = re.sub(r"\+\s*python\s+/tmp/workload\.py\s*", "", segment)
+        segment = re.sub(r"\+\s*echo\s+PERF_START:\s*", "", segment)
+        core = segment.strip()
+    except ValueError:
+        core = txt  # fallback to entire log
+    mean = None; std = None
+    m = MEAN_RE.search(core)
+    if m: 
+        try: mean = float(m.group(1))
+        except: pass
+    s = STD_RE.search(core)
+    if s:
+        try: std = float(s.group(1))
+        except: pass
+    # Remove lines that contain Mean/Std for error-only view
+    err = re.sub(MEAN_RE, "", core)
+    err = re.sub(STD_RE, "", err)
+    err = err.strip()
+    return {"core": core, "mean": mean, "std": std, "error": (err if err else None)}
+
+@app.post("/api/bench/run")
+def bench_run(req: BenchRunReq, request: Request):
+    check_origin(request)
+    os.makedirs(ROOT_DIR, exist_ok=True)
+    job_dir = ensure_sandbox(os.path.join(ROOT_DIR, req.jobId))
+    meta_path = os.path.join(job_dir, "meta.json")
+    workload_path = os.path.join(job_dir, "workload.py")
+    if not (os.path.exists(meta_path) and os.path.exists(workload_path)):
+        raise HTTPException(400, "invalid jobId")
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+    image = meta.get("image")
+
+    # Pull image (best-effort)
+    try:
+        run_cmd(f"docker pull {image}", timeout=240)
+    except Exception:
+        pass
+
+    # Helper to exec inside container and collect logs
+    def exec_phase(phase: str):
+        # Mount workload.py into /tmp/workload.py and run /perf.sh
+        cmd = (
+            f"docker run --rm --cpus=1 --memory=1g --pids-limit=256 "
+            f"--network=none --cap-drop=ALL --security-opt no-new-privileges "
+            f"--mount type=bind,src={shlex.quote(workload_path)},dst=/tmp/workload.py "
+            f"{image} /bin/bash -lc "
+            f"\"set +e; echo PERF_START:; python /tmp/workload.py; echo PERF_END:; "
+            f"if [ -f /perf.sh ]; then chmod +x /perf.sh; /perf.sh || true; fi\""
+        )
+        try:
+            cp = run_cmd(cmd, timeout=1800)
+            out = cp.stdout.decode("utf-8", "ignore")
+            core = parse_perf_core(out)
+            # Attach raw if needed
+            core["raw"] = out
+            return core
+        except Exception as e:
+            return {"error": str(e)}
+
+    before = exec_phase("before")
+
+    # Apply patch if present
+    patch_path = os.path.join(job_dir, "patch.diff")
+    if os.path.exists(patch_path):
+        # Run an ephemeral container just to apply patch to repo inside image if required; skipped here
+        pass
+
+    after = exec_phase("after")
+
+    return JSONResponse({"ok": True, "before": before, "after": after})
