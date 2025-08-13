@@ -24,10 +24,8 @@ jobs:
           rm -rf _site
           mkdir -p _site
           cp -R index.html leaderboard.html bench.html contact.html assets _site/
-          # 发布 helper 下载目录（仅包含安装器与说明，不含 .venv 等）
           mkdir -p _site/nonllmplatform/downloadhelper
           cp -R nonllmplatform/downloadhelper/* _site/nonllmplatform/downloadhelper/
-          # 确保禁用 Jekyll
           touch _site/.nojekyll
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
