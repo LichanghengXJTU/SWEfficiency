@@ -247,6 +247,7 @@ def save_token(req: TokenReq, request: Request):
     return ok()
 
 GITHUB_API = "https://api.github.com"
+DEVICE_FLOW_FILE = os.path.join(TOKEN_DIR, "device_flow.json")
 
 def gh_headers(token: str):
     return {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
@@ -291,40 +292,64 @@ def upload_run(req: UploadReq, request: Request):
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, "r", encoding="utf-8") as f:
             token = f.read().strip()
+    # If have pending device flow, try a quick poll
+    if not token and os.path.exists(DEVICE_FLOW_FILE) and GH_CLIENT_ID and GH_CLIENT_SECRET:
+        try:
+            with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
+                st = json.load(f)
+            device_code = st.get("device_code"); interval = int(st.get("interval", 5))
+            tok = requests.post(
+                "https://github.com/login/oauth/access_token",
+                data={
+                    "client_id": GH_CLIENT_ID,
+                    "device_code": device_code,
+                    "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
+                    "client_secret": GH_CLIENT_SECRET,
+                },
+                headers={"Accept": "application/json"},
+            ).json()
+            if tok.get("access_token"):
+                token = tok["access_token"]
+                os.makedirs(TOKEN_DIR, exist_ok=True)
+                with open(TOKEN_FILE, "w", encoding="utf-8") as f:
+                    f.write(token)
+                # 清理设备文件
+                try: os.remove(DEVICE_FLOW_FILE)
+                except Exception: pass
+        except Exception:
+            pass
+
     if not token:
         # If no OAuth secret, ask for PAT via /api/upload/token
         if not (GH_CLIENT_ID and GH_CLIENT_SECRET):
             return JSONResponse({"ok": True, "uploaded": False, "needToken": True, "message": "GitHub token required. Please create a PAT with repo scope and POST it to /api/upload/token."})
-        # Device flow (optional, requires secret)
+        # Start device flow (do not block here)
         try:
-            dc = requests.post("https://github.com/login/device/code", data={"client_id": GH_CLIENT_ID, "scope": "repo"}, headers={"Accept":"application/json"}).json()
+            dc = requests.post(
+                "https://github.com/login/device/code",
+                data={"client_id": GH_CLIENT_ID, "scope": "repo"},
+                headers={"Accept": "application/json"},
+            ).json()
             verify_uri = dc.get("verification_uri") or "https://github.com/login/device"
-            user_code = dc.get("user_code")
-            device_code = dc.get("device_code")
-            interval = int(dc.get("interval", 5))
-            # Try opening browser locally for convenience
+            user_code = dc.get("user_code"); device_code = dc.get("device_code"); interval = int(dc.get("interval", 5))
+            os.makedirs(TOKEN_DIR, exist_ok=True)
+            with open(DEVICE_FLOW_FILE, "w", encoding="utf-8") as f:
+                json.dump({"device_code": device_code, "interval": interval, "created": int(time.time())}, f)
+            # 便捷打开浏览器
             try:
                 subprocess.run(["open", verify_uri], check=False)
             except Exception:
                 pass
-            # Poll for token
-            token = None
-            start = time.time()
-            while time.time() - start < 600:
-                tok = requests.post("https://github.com/login/oauth/access_token", data={
-                    "client_id": GH_CLIENT_ID, "device_code": device_code, "grant_type": "urn:ietf:params:oauth:grant-type:device_code", "client_secret": GH_CLIENT_SECRET
-                }, headers={"Accept":"application/json"}).json()
-                if tok.get("access_token"):
-                    token = tok["access_token"]
-                    break
-                time.sleep(interval)
-            if not token:
-                return JSONResponse({"ok": False, "uploaded": False, "message": f"Authorization not completed. Visit {verify_uri} and enter code {user_code}."}, status_code=400)
-            os.makedirs(TOKEN_DIR, exist_ok=True)
-            with open(TOKEN_FILE, "w", encoding="utf-8") as f:
-                f.write(token)
+            return JSONResponse({
+                "ok": True,
+                "uploaded": False,
+                "needDevice": True,
+                "verifyUri": verify_uri,
+                "userCode": user_code,
+                "message": "Please open the verification URL and enter the code, then click Submit & Upload again."
+            })
         except Exception as e:
-            return JSONResponse({"ok": False, "uploaded": False, "message": f"Device flow failed: {e}"}, status_code=500)
+            return JSONResponse({"ok": False, "uploaded": False, "message": f"Device flow init failed: {e}"}, status_code=500)
 
     # Build path Non_LLM_user_data/<instance>/<YYYYMMDD>.json
     if not instance:

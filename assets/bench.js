@@ -53,7 +53,9 @@
       const res = await fetch(`${ENDPOINT}/api/upload_run`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       const json = await res.json();
       if (json.ok){
-        if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); }
+        if (json.needDevice && json.verifyUri && json.userCode){
+          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Then click “Submit & Upload” again.`);
+        } else if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); }
         else if (json.needToken){ log(ulog, 'GitHub token required. Create a PAT with repo scope and POST to https://127.0.0.1:5050/api/upload/token'); }
         else { log(ulog, json.message || 'Thanks! Recorded locally.'); }
       } else {
