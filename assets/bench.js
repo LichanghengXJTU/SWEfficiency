@@ -64,6 +64,19 @@
     }catch(e){ log(ulog, String(e)); }
   }
 
+  async function startAuth(){
+    const ulog = $('upload-log');
+    try{
+      const res = await fetch(`${ENDPOINT}/api/upload/start`, { method:'POST' });
+      const json = await res.json();
+      if (json.ok && json.needDevice){
+        log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. After authorization, click “Submit & Upload”.`);
+      } else {
+        log(ulog, json.message || 'Unexpected response while starting authentication');
+      }
+    }catch(e){ log(ulog, String(e)); }
+  }
+
   let runAbort=null;
   async function runBenchmark(){
     // reset UI
@@ -128,6 +141,14 @@
     $('copy-after')?.addEventListener('click', () => copyText(`Mean: ${$('after-mean').textContent} | Std: ${$('after-std').textContent}`));
     $('btn-submit')?.addEventListener('click', submitMeta);
     $('btn-upload')?.addEventListener('click', uploadRun);
+    // Add an Authenticate button dynamically next to upload (to avoid HTML edits if not present)
+    const uploadBtn = $('btn-upload');
+    if (uploadBtn){
+      const authBtn = document.createElement('button');
+      authBtn.className = 'btn'; authBtn.id = 'btn-auth'; authBtn.textContent = 'Authenticate';
+      uploadBtn.parentElement.insertBefore(authBtn, uploadBtn);
+      authBtn.addEventListener('click', startAuth);
+    }
     health();
   });
 })(); 

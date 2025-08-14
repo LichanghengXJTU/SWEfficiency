@@ -257,6 +257,47 @@ def parse_instance_from_github(url: str) -> Optional[str]:
     if not m: return None
     return f"{m.group(1)}__{m.group(2)}-{m.group(3)}"
 
+@app.post("/api/upload/start")
+def upload_start(request: Request):
+    check_origin(request)
+    if not (GH_CLIENT_ID and GH_CLIENT_SECRET):
+        return JSONResponse({"ok": False, "needToken": True, "message": "GitHub token required. Configure device flow secrets or use /api/upload/token."}, status_code=400)
+    # Reuse pending code if exists and fresh
+    if os.path.exists(DEVICE_FLOW_FILE):
+        try:
+            with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
+                st = json.load(f)
+            user_code = st.get("user_code") or st.get("userCode")
+            verify_uri = st.get("verify_uri") or st.get("verifyUri") or "https://github.com/login/device"
+            created = int(st.get("created", 0))
+            if user_code and int(time.time()) - created < 600:
+                return JSONResponse({"ok": True, "needDevice": True, "verifyUri": verify_uri, "userCode": user_code})
+        except Exception:
+            pass
+    try:
+        resp = requests.post(
+            "https://github.com/login/device/code",
+            data={"client_id": GH_CLIENT_ID, "scope": "repo"},
+            headers={"Accept": "application/json", "Content-Type": "application/x-www-form-urlencoded"},
+        )
+        if resp.status_code == 429 or (resp.headers.get("Content-Type","" ).find("application/json") == -1):
+            return JSONResponse({"ok": False, "message": "GitHub rate-limited. Please wait a few minutes and try again."}, status_code=429)
+        dc = resp.json()
+        verify_uri = dc.get("verification_uri") or "https://github.com/login/device"
+        user_code = dc.get("user_code"); device_code = dc.get("device_code"); interval = int(dc.get("interval", 5))
+        os.makedirs(TOKEN_DIR, exist_ok=True)
+        with open(DEVICE_FLOW_FILE, "w", encoding="utf-8") as f:
+            json.dump({
+                "device_code": device_code,
+                "interval": interval,
+                "created": int(time.time()),
+                "user_code": user_code,
+                "verify_uri": verify_uri
+            }, f)
+        return JSONResponse({"ok": True, "needDevice": True, "verifyUri": verify_uri, "userCode": user_code})
+    except Exception as e:
+        return JSONResponse({"ok": False, "message": f"Device flow init failed: {e}"}, status_code=500)
+
 @app.post("/api/upload_run")
 def upload_run(req: UploadReq, request: Request):
     check_origin(request)
@@ -298,7 +339,7 @@ def upload_run(req: UploadReq, request: Request):
             with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
                 st = json.load(f)
             device_code = st.get("device_code"); interval = int(st.get("interval", 5))
-            tok = requests.post(
+            resp = requests.post(
                 "https://github.com/login/oauth/access_token",
                 data={
                     "client_id": GH_CLIENT_ID,
@@ -306,40 +347,90 @@ def upload_run(req: UploadReq, request: Request):
                     "grant_type": "urn:ietf:params:oauth:grant-type:device_code",
                     "client_secret": GH_CLIENT_SECRET,
                 },
-                headers={"Accept": "application/json"},
-            ).json()
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            )
+            try:
+                tok = resp.json()
+            except Exception:
+                return JSONResponse({"ok": False, "uploaded": False, "message": resp.text or "Device token polling returned non-JSON"}, status_code=502)
             if tok.get("access_token"):
                 token = tok["access_token"]
                 os.makedirs(TOKEN_DIR, exist_ok=True)
                 with open(TOKEN_FILE, "w", encoding="utf-8") as f:
                     f.write(token)
-                # 清理设备文件
                 try: os.remove(DEVICE_FLOW_FILE)
                 except Exception: pass
-        except Exception:
-            pass
+        except Exception as e:
+            return JSONResponse({"ok": False, "uploaded": False, "message": f"Device token polling failed: {e}"}, status_code=502)
 
     if not token:
-        # If no OAuth secret, ask for PAT via /api/upload/token
         if not (GH_CLIENT_ID and GH_CLIENT_SECRET):
             return JSONResponse({"ok": True, "uploaded": False, "needToken": True, "message": "GitHub token required. Please create a PAT with repo scope and POST it to /api/upload/token."})
-        # Start device flow (do not block here)
+        # 若已有未完成的设备授权，直接复用，不要重复初始化以免触发限流
+        if os.path.exists(DEVICE_FLOW_FILE):
+            try:
+                with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
+                    st = json.load(f)
+                verify_uri = st.get("verify_uri") or st.get("verifyUri") or "https://github.com/login/device"
+                user_code = st.get("user_code") or st.get("userCode")
+                created = int(st.get("created", 0))
+                # 简单冷却：60 秒内不再请求新 code
+                if user_code and (int(time.time()) - created < 60):
+                    return JSONResponse({
+                        "ok": True,
+                        "uploaded": False,
+                        "needDevice": True,
+                        "verifyUri": verify_uri,
+                        "userCode": user_code,
+                        "message": "Please open the verification URL and enter the code, then click Submit & Upload again."
+                    })
+            except Exception:
+                pass
         try:
-            dc = requests.post(
+            resp = requests.post(
                 "https://github.com/login/device/code",
                 data={"client_id": GH_CLIENT_ID, "scope": "repo"},
-                headers={"Accept": "application/json"},
-            ).json()
+                headers={
+                    "Accept": "application/json",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            )
+            # 429 或 HTML 等非 JSON：返回提示，避免抛异常
+            if resp.status_code == 429 or (resp.headers.get("Content-Type","" ).find("application/json") == -1):
+                # 如果有历史 code，优先返回
+                if os.path.exists(DEVICE_FLOW_FILE):
+                    try:
+                        with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
+                            st = json.load(f)
+                        return JSONResponse({
+                            "ok": True,
+                            "uploaded": False,
+                            "needDevice": True,
+                            "verifyUri": st.get("verify_uri") or st.get("verifyUri") or "https://github.com/login/device",
+                            "userCode": st.get("user_code") or st.get("userCode"),
+                            "message": "GitHub rate-limited. Please use the existing code, wait a minute, then click Submit & Upload again."
+                        })
+                    except Exception:
+                        pass
+                return JSONResponse({"ok": False, "uploaded": False, "message": "GitHub rate-limited. Please wait 1–5 minutes and try again."}, status_code=429)
+            try:
+                dc = resp.json()
+            except Exception:
+                return JSONResponse({"ok": False, "uploaded": False, "message": resp.text or "Device code init returned non-JSON"}, status_code=502)
             verify_uri = dc.get("verification_uri") or "https://github.com/login/device"
             user_code = dc.get("user_code"); device_code = dc.get("device_code"); interval = int(dc.get("interval", 5))
             os.makedirs(TOKEN_DIR, exist_ok=True)
             with open(DEVICE_FLOW_FILE, "w", encoding="utf-8") as f:
-                json.dump({"device_code": device_code, "interval": interval, "created": int(time.time())}, f)
-            # 便捷打开浏览器
-            try:
-                subprocess.run(["open", verify_uri], check=False)
-            except Exception:
-                pass
+                json.dump({
+                    "device_code": device_code,
+                    "interval": interval,
+                    "created": int(time.time()),
+                    "user_code": user_code,
+                    "verify_uri": verify_uri
+                }, f)
             return JSONResponse({
                 "ok": True,
                 "uploaded": False,
