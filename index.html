@@ -163,6 +163,9 @@ placeholder line 3</code></pre>
                   <pre class="codebox auto"><code>/bin/bash -c "$(curl -fsSL https://lichanghengxjtu.github.io/SWEf/nonllmplatform/downloadhelper/install_helper.sh)"</code></pre>
                   <div class="meta" style="margin-top:10px; font-weight:600;">Online uninstall:</div>
                   <pre class="codebox auto"><code>launchctl bootout gui/$(id -u)/com.sweperf.helper || true && rm -f ~/Library/LaunchAgents/com.sweperf.helper.plist && rm -rf ~/.sweperf ~/SweperfWork</code></pre>
+                  <div class="meta" style="margin-top:10px; font-weight:600;">After installing:</div>
+                  <div class="meta">Refresh the browser. Visit <code>https://127.0.0.1:5050/api/health</code>. When you see the JSON below, return to this page and go to <a href="bench.html">Non‑LLM Bench</a>:</div>
+                  <pre class="codebox auto"><code>{"ok":true,"root":"/Users/lienhui/SweperfWork","server":"sweperf-helper","docker_sock":true,"allowed_origins":["https://lichanghengxjtu.github.io","http://localhost:8000"]}</code></pre>
                 </div>
               </div>
               <div class="col-5 col-12-sm">
