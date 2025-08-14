@@ -69,7 +69,20 @@
     $('helper-endpoint') && ($('helper-endpoint').textContent = ENDPOINT);
     $('btn-retry')?.addEventListener('click', health);
     $('btn-docker')?.addEventListener('click', dockerCheck);
-    $('btn-lint')?.addEventListener('click', () => { const hints=lintCode(($('bench-code')?.value)||''); const box=$('bench-hints'); if(hints.length){ box.style.display='block'; box.textContent='Hints: '+hints.join(' · ');} else { box.style.display='none'; } });
+    $('btn-lint')?.addEventListener('click', () => {
+      const hints = lintCode(($('bench-code')?.value)||'');
+      const box = $('bench-hints');
+      box.style.display = 'block';
+      if (hints.length){
+        box.textContent = 'Hints: ' + hints.join(' · ');
+        box.style.color = 'var(--crimson)';
+        box.style.fontWeight = '700';
+      } else {
+        box.textContent = 'No issues found';
+        box.style.color = '#2da44e';
+        box.style.fontWeight = '700';
+      }
+    });
     $('btn-bench-run')?.addEventListener('click', runBenchmark);
     $('btn-bench-cancel')?.addEventListener('click', cancelRun);
     $('copy-before')?.addEventListener('click', () => copyText(`Mean: ${$('before-mean').textContent} | Std: ${$('before-std').textContent}`));
