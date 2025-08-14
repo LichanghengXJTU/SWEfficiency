@@ -181,16 +181,23 @@
                     <label class="meta">Notes
                       <textarea id="user-notes" rows="4" placeholder="your notes..." style="width:100%; padding:10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font:inherit;"></textarea>
                     </label>
+                    <label class="meta" style="display:flex; align-items:center; gap:8px;">
+                      <input id="agree-upload" type="checkbox"/>
+                      <span>I agree to upload to SWEf‑data</span>
+                    </label>
+                    <div class="meta" style="color:#6a7079;">Only runs with improvement &gt; 15% will be uploaded; all submissions are recorded locally. By uploading, you consent to store your submission (including the provided workload and metrics) in the public repository SWEf‑data. No other local files or credentials are collected.</div>
                   </div>
-                  <div style="margin-top:10px; display:flex; gap:10px;">
-                    <button class="btn btn-secondary" id="btn-submit">Submit</button>
+                  <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn btn-secondary" id="btn-submit">Submit (local)</button>
+                    <button class="btn" id="btn-upload">Submit & Upload</button>
                   </div>
                 </div>
               </div>
               <div class="col-5 col-12-sm">
                 <div class="flat-card">
-                  <div class="meta">Submit output</div>
+                  <div class="meta">Submit / Upload output</div>
                   <pre class="codebox auto" id="submit-log"><code>waiting...</code></pre>
+                  <pre class="codebox auto" id="upload-log" style="margin-top:8px;"><code>waiting...</code></pre>
                 </div>
               </div>
             </div>

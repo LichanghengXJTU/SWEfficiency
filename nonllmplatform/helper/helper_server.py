@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import re, secrets
 from datetime import datetime
+import base64, requests
 
 def env_list(name: str, default: List[str]) -> List[str]:
     v = os.environ.get(name, "")
@@ -22,6 +23,12 @@ ALLOWED_ORIGINS = env_list("SWEP_ALLOWED_ORIGINS", [
 
 ROOT_DIR = os.environ.get("SWEP_WORK_ROOT", str(pathlib.Path.home() / "SweperfWork"))
 SUBMIT_FILE = os.path.join(ROOT_DIR, "submissions.jsonl")
+TOKEN_DIR = os.path.join(pathlib.Path.home(), ".sweperf")
+TOKEN_FILE = os.path.join(TOKEN_DIR, "github_token")
+DATA_REPO = os.environ.get("SWEF_DATA_REPO", "lichanghengxjtu/SWEf-data")
+DATA_PATH = os.environ.get("SWEF_DATA_PATH", "Non_LLM_user_data")
+GH_CLIENT_ID = os.environ.get("SWEF_GH_CLIENT_ID")
+GH_CLIENT_SECRET = os.environ.get("SWEF_GH_CLIENT_SECRET")
 
 app = FastAPI(title="Sweperf Non-LLM helper")
 
@@ -216,3 +223,143 @@ def bench_run(req: BenchRunReq, request: Request):
         return JSONResponse({"ok": True, "before": parsed["before"], "after": parsed["after"]})
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+
+class UploadReq(BaseModel):
+    image: str
+    instanceId: Optional[str] = None
+    githubUrl: Optional[str] = None
+    workload_b64: str
+    before: dict
+    after: dict
+    improvement: float
+    notes: Optional[str] = None
+    ts: Optional[int] = None
+
+class TokenReq(BaseModel):
+    token: str
+
+@app.post("/api/upload/token")
+def save_token(req: TokenReq, request: Request):
+    check_origin(request)
+    os.makedirs(TOKEN_DIR, exist_ok=True)
+    with open(TOKEN_FILE, "w", encoding="utf-8") as f:
+        f.write(req.token.strip())
+    return ok()
+
+GITHUB_API = "https://api.github.com"
+
+def gh_headers(token: str):
+    return {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
+
+def parse_instance_from_github(url: str) -> Optional[str]:
+    m = re.search(r"github\.com/([^/]+)/([^/]+)/pull/(\d+)", url)
+    if not m: return None
+    return f"{m.group(1)}__{m.group(2)}-{m.group(3)}"
+
+@app.post("/api/upload_run")
+def upload_run(req: UploadReq, request: Request):
+    check_origin(request)
+    os.makedirs(ROOT_DIR, exist_ok=True)
+
+    # Normalize instance/image
+    instance = req.instanceId or (parse_instance_from_github(req.githubUrl or "") or "")
+    image = req.image or (f"docker.io/sweperf/sweperf_annotate:{instance}" if instance else req.image)
+
+    # Local audit
+    record = {
+        "id": f"job-{int(time.time())}-{secrets.token_hex(4)}",
+        "ts": req.ts or int(time.time()),
+        "image": image,
+        "instanceId": instance,
+        "githubUrl": req.githubUrl,
+        "workload_b64": req.workload_b64,
+        "before": req.before,
+        "after": req.after,
+        "improvement": req.improvement,
+        "notes": req.notes,
+        "client": {"helper_version": "1.0"}
+    }
+    with open(SUBMIT_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+    # Threshold check
+    if not isinstance(req.improvement, (int, float)) or req.improvement <= 15:
+        return JSONResponse({"ok": True, "uploaded": False, "message": "Thanks! Recorded locally (improvement ≤ 15%, not uploaded)."})
+
+    # Need token
+    token = None
+    if os.path.exists(TOKEN_FILE):
+        with open(TOKEN_FILE, "r", encoding="utf-8") as f:
+            token = f.read().strip()
+    if not token:
+        # If no OAuth secret, ask for PAT via /api/upload/token
+        if not (GH_CLIENT_ID and GH_CLIENT_SECRET):
+            return JSONResponse({"ok": True, "uploaded": False, "needToken": True, "message": "GitHub token required. Please create a PAT with repo scope and POST it to /api/upload/token."})
+        # Device flow (optional, requires secret)
+        try:
+            dc = requests.post("https://github.com/login/device/code", data={"client_id": GH_CLIENT_ID, "scope": "repo"}, headers={"Accept":"application/json"}).json()
+            verify_uri = dc.get("verification_uri") or "https://github.com/login/device"
+            user_code = dc.get("user_code")
+            device_code = dc.get("device_code")
+            interval = int(dc.get("interval", 5))
+            # Try opening browser locally for convenience
+            try:
+                subprocess.run(["open", verify_uri], check=False)
+            except Exception:
+                pass
+            # Poll for token
+            token = None
+            start = time.time()
+            while time.time() - start < 600:
+                tok = requests.post("https://github.com/login/oauth/access_token", data={
+                    "client_id": GH_CLIENT_ID, "device_code": device_code, "grant_type": "urn:ietf:params:oauth:grant-type:device_code", "client_secret": GH_CLIENT_SECRET
+                }, headers={"Accept":"application/json"}).json()
+                if tok.get("access_token"):
+                    token = tok["access_token"]
+                    break
+                time.sleep(interval)
+            if not token:
+                return JSONResponse({"ok": False, "uploaded": False, "message": f"Authorization not completed. Visit {verify_uri} and enter code {user_code}."}, status_code=400)
+            os.makedirs(TOKEN_DIR, exist_ok=True)
+            with open(TOKEN_FILE, "w", encoding="utf-8") as f:
+                f.write(token)
+        except Exception as e:
+            return JSONResponse({"ok": False, "uploaded": False, "message": f"Device flow failed: {e}"}, status_code=500)
+
+    # Build path Non_LLM_user_data/<instance>/<YYYYMMDD>.json
+    if not instance:
+        return JSONResponse({"ok": False, "uploaded": False, "message": "instanceId missing; cannot determine upload path."}, status_code=400)
+    date_str = datetime.utcfromtimestamp(record["ts"]).strftime("%Y%m%d")
+    rel_path = f"{DATA_PATH}/{instance}/{date_str}.json"
+
+    # Create branch and PR
+    try:
+        # Get repo info
+        repo = DATA_REPO
+        s = requests.get(f"{GITHUB_API}/repos/{repo}", headers=gh_headers(token)).json()
+        default_branch = s.get("default_branch", "main")
+        ref = requests.get(f"{GITHUB_API}/repos/{repo}/git/ref/heads/{default_branch}", headers=gh_headers(token)).json()
+        base_sha = ref.get("object", {}).get("sha")
+        branch = f"submission-{instance}-{date_str}-{secrets.token_hex(3)}"
+        # create branch
+        requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json={"ref": f"refs/heads/{branch}", "sha": base_sha}).raise_for_status()
+        # put content
+        content_b64 = base64.b64encode(json.dumps(record, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
+        put = requests.put(f"{GITHUB_API}/repos/{repo}/contents/{rel_path}", headers=gh_headers(token), json={
+            "message": f"add Non-LLM user data {instance} {date_str}",
+            "content": content_b64,
+            "branch": branch
+        })
+        put.raise_for_status()
+        # create PR
+        pr = requests.post(f"{GITHUB_API}/repos/{repo}/pulls", headers=gh_headers(token), json={
+            "title": f"Non-LLM user data: {instance}/{date_str}.json",
+            "head": branch,
+            "base": default_branch,
+            "body": "Automated submission from SWEf Helper"
+        })
+        pr.raise_for_status()
+        pr_url = pr.json().get("html_url")
+        return JSONResponse({"ok": True, "uploaded": True, "prUrl": pr_url, "path": rel_path})
+    except Exception as e:
+        return JSONResponse({"ok": False, "uploaded": False, "message": f"Upload failed: {e}"}, status_code=500)

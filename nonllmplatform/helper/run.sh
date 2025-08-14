@@ -9,6 +9,13 @@ ALLOWED="${SWEP_ALLOWED_ORIGINS:-https://lichanghengxjtu.github.io,http://localh
 CERT="$HOME/.sweperf/certs/localhost.pem"
 KEY="$HOME/.sweperf/certs/localhost-key.pem"
 
+# SWEf-data 上传相关（可在外部覆写）
+export SWEF_DATA_REPO="${SWEF_DATA_REPO:-lichanghengxjtu/SWEf-data}"
+export SWEF_DATA_PATH="${SWEF_DATA_PATH:-Non_LLM_user_data}"
+export SWEF_GH_CLIENT_ID="${SWEF_GH_CLIENT_ID:-Ov23liNsCTJnDfTRPe4X}"
+# 若使用 GitHub Device Flow，建议另外设置 SWEF_GH_CLIENT_SECRET；
+# 如未设置，将要求用户提供 PAT 通过 /api/upload/token 注入。
+
 # 进入脚本所在目录
 cd "$(dirname "$0")"
 

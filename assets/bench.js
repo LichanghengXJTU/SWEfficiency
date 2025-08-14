@@ -25,6 +25,44 @@
 
   function lintCode(code){ const hints=[]; [/\bimport\s+timeit\b/,/\bimport\s+statistics\b/].forEach(r=>{ if(!r.test(code)) hints.push('Missing required import: '+r.source.replace(/\\b/g,''));}); if(!/Mean\s*:/.test(code)) hints.push('Expected print("Mean:", value)'); if(!/(Std\s*Dev|Std)\s*:/.test(code)) hints.push('Expected print("Std Dev:", value)'); if(code.trim().length<20) hints.push('Code seems too short'); return hints; }
 
+  async function submitMeta(){
+    const slog = $('submit-log');
+    const email = $('user-email').value.trim();
+    const notes = $('user-notes').value.trim();
+    try{
+      const res = await fetch(`${ENDPOINT}/api/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, notes, ts: Date.now(), meta: {} }) });
+      const txt = await res.text(); log(slog, txt);
+    }catch(e){ log(slog, String(e)); }
+  }
+
+  async function uploadRun(){
+    const ulog = $('upload-log');
+    const agreed = $('agree-upload').checked;
+    if (!agreed){ log(ulog, 'Please check “I agree to upload to SWEf‑data” first.'); return; }
+    try{
+      // Collect current run info from UI
+      const image = $('bench-image').textContent.trim();
+      const idraw = $('bench-id').value.trim();
+      const instance = (idraw.match(/[\w.-]+__[^\s:]+-\d+/)||[])[0] || '';
+      const code = $('bench-code').value;
+      const workload_b64 = btoa(unescape(encodeURIComponent(code)));
+      const before = { mean: parseFloat($('before-mean').textContent)||null, std: parseFloat($('before-std').textContent)||null };
+      const after  = { mean: parseFloat($('after-mean').textContent)||null, std: parseFloat($('after-std').textContent)||null };
+      let improvement = null; if (isFinite(before.mean) && isFinite(after.mean)){ improvement = ((before.mean - after.mean)/before.mean)*100; }
+      const notes = $('user-notes').value.trim();
+      const body = { image, instanceId: instance||undefined, githubUrl: isGithub(idraw)?idraw:undefined, workload_b64, before, after, improvement, notes, ts: Date.now() };
+      const res = await fetch(`${ENDPOINT}/api/upload_run`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (json.ok){
+        if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); }
+        else if (json.needToken){ log(ulog, 'GitHub token required. Create a PAT with repo scope and POST to https://127.0.0.1:5050/api/upload/token'); }
+        else { log(ulog, json.message || 'Thanks! Recorded locally.'); }
+      } else {
+        log(ulog, json.message || 'Upload failed');
+      }
+    }catch(e){ log(ulog, String(e)); }
+  }
+
   let runAbort=null;
   async function runBenchmark(){
     // reset UI
@@ -87,6 +125,8 @@
     $('btn-bench-cancel')?.addEventListener('click', cancelRun);
     $('copy-before')?.addEventListener('click', () => copyText(`Mean: ${$('before-mean').textContent} | Std: ${$('before-std').textContent}`));
     $('copy-after')?.addEventListener('click', () => copyText(`Mean: ${$('after-mean').textContent} | Std: ${$('after-std').textContent}`));
+    $('btn-submit')?.addEventListener('click', submitMeta);
+    $('btn-upload')?.addEventListener('click', uploadRun);
     health();
   });
 })(); 
