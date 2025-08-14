@@ -201,7 +201,7 @@ def bench_run(req: BenchRunReq, request: Request):
     def exec_phase(phase: str):
         # Mount workload.py into /tmp/workload.py and run /perf.sh
         cmd = (
-            f"docker run -it --rm "
+            f"docker run --rm "
             f"--mount type=bind,src={shlex.quote(workload_path)},dst=/tmp/workload.py "
             f"{image} /bin/bash -lc "
             f"\"set +e; echo PERF_START:; python /tmp/workload.py; echo PERF_END:; "
