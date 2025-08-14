@@ -21,7 +21,7 @@
   const isInstance = (s) => /^[\w.-]+__[^\s:]+-\d+$/i.test(s.trim());
   function parseInstanceId(input){ const s=input.trim(); if(isGithub(s)){ const m=s.match(/github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)/i); if(m) return `${m[1]}__${m[2]}-${m[3]}`;} else if(isDocker(s)){ const mm=s.split(':'); const tag=mm[1]||''; if(isInstance(tag)) return tag;} else if(isInstance(s)){ return s;} return null; }
   function imageFromInstance(instance){ return `docker.io/sweperf/sweperf_annotate:${instance}`; }
-  function genDockerCmd(hostPath, image){ const src=hostPath?JSON.stringify(hostPath):'<REPLACE_ME>'; return `docker run -it --rm --cpus=1 --memory=1g --pids-limit=256 --network=none --cap-drop=ALL --security-opt no-new-privileges --mount type=bind,src=${src},dst=/tmp/workload.py ${image} /bin/bash`; }
+  function genDockerCmd(hostPath, image){ const src=hostPath?JSON.stringify(hostPath):'<REPLACE_ME>'; return `docker run -it --mount type=bind,src=${src},dst=/tmp/workload.py ${image} /bin/bash`; }
 
   function lintCode(code){ const hints=[]; [/\bimport\s+timeit\b/,/\bimport\s+statistics\b/].forEach(r=>{ if(!r.test(code)) hints.push('Missing required import: '+r.source.replace(/\\b/g,''));}); if(!/Mean\s*:/.test(code)) hints.push('Expected print("Mean:", value)'); if(!/(Std\s*Dev|Std)\s*:/.test(code)) hints.push('Expected print("Std Dev:", value)'); if(code.trim().length<20) hints.push('Code seems too short'); return hints; }
 
@@ -46,24 +46,16 @@
     if(runAbort){ runAbort.abort(); runAbort=null; } runAbort=new AbortController();
     try{
       const data=await getJSON('/api/bench/run', { method:'POST', signal: runAbort.signal, body: JSON.stringify({ jobId: prep.jobId }) });
-      // pull message (if backend returns raw logs inside before/after.raw, show any pull-related lines heuristically)
-      const pullLines=[];
-      const rawBefore = (data.before&&data.before.raw)||'';
-      const rawAfter = (data.after&&data.after.raw)||'';
-      const collectPull=(txt)=>{
-        txt.split(/\n/).forEach(line=>{ if(/pull|download|extract/i.test(line)) pullLines.push(line); });
-      };
-      collectPull(rawBefore); collectPull(rawAfter);
-      if(pullLines.length) log($('pull-log'), pullLines.join('\n'));
+      const pullLines=[]; const rawBefore=(data.before&&data.before.raw)||''; const rawAfter=(data.after&&data.after.raw)||'';
+      const collectPull=(txt)=>{ txt.split(/\n/).forEach(line=>{ if(/pull|download|extract/i.test(line)) pullLines.push(line); }); };
+      collectPull(rawBefore); collectPull(rawAfter); if(pullLines.length) log($('pull-log'), pullLines.join('\n'));
 
-      // before
-      $('before-mean').textContent = (data.before&&data.before.mean!=null)? String(data.before.mean): '—';
-      $('before-std').textContent = (data.before&&data.before.std!=null)? String(data.before.std): '—';
+      $('before-mean').textContent=(data.before&&data.before.mean!=null)? String(data.before.mean):'—';
+      $('before-std').textContent=(data.before&&data.before.std!=null)? String(data.before.std):'—';
       log($('before-log'), data.before?.error || data.before?.core || '');
 
-      // after
-      $('after-mean').textContent = (data.after&&data.after.mean!=null)? String(data.after.mean): '—';
-      $('after-std').textContent = (data.after&&data.after.std!=null)? String(data.after.std): '—';
+      $('after-mean').textContent=(data.after&&data.after.mean!=null)? String(data.after.mean):'—';
+      $('after-std').textContent=(data.after&&data.after.std!=null)? String(data.after.std):'—';
       log($('after-log'), data.after?.error || data.after?.core || '');
 
       const bm=parseFloat(data.before?.mean), am=parseFloat(data.after?.mean);
