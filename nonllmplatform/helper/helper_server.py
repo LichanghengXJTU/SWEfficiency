@@ -151,32 +151,26 @@ class BenchRunReq(BaseModel):
 MEAN_RE = re.compile(r"Mean\s*:\s*([0-9.+-Ee]+)")
 STD_RE = re.compile(r"(?:Std\s*Dev|Std)\s*:\s*([0-9.+-Ee]+)")
 
-def parse_perf_core(txt: str):
-    core = ""
-    try:
-        start = txt.index("PERF_START:")
-        end = txt.index("PERF_END:", start)
-        segment = txt[start:end]
-        # Remove boilerplate markers
-        segment = re.sub(r"\+\s*python\s+/tmp/workload\.py\s*", "", segment)
-        segment = re.sub(r"\+\s*echo\s+PERF_START:\s*", "", segment)
-        core = segment.strip()
-    except ValueError:
-        core = txt  # fallback to entire log
-    mean = None; std = None
-    m = MEAN_RE.search(core)
-    if m: 
-        try: mean = float(m.group(1))
-        except: pass
-    s = STD_RE.search(core)
-    if s:
-        try: std = float(s.group(1))
-        except: pass
-    # Remove lines that contain Mean/Std for error-only view
-    err = re.sub(MEAN_RE, "", core)
-    err = re.sub(STD_RE, "", err)
-    err = err.strip()
-    return {"core": core, "mean": mean, "std": std, "error": (err if err else None)}
+# 解析 BEFORE/AFTER 两段输出
+def parse_perf_two(txt: str):
+    def extract(tag: str):
+        start_tag = f"PERF_START:{tag}"
+        end_tag = f"PERF_END:{tag}"
+        try:
+            s = txt.index(start_tag)
+            e = txt.index(end_tag, s)
+            seg = txt[s:e]
+        except ValueError:
+            return {"core": "", "mean": None, "std": None, "error": None}
+        core = seg.strip()
+        m = MEAN_RE.search(core)
+        mean = float(m.group(1)) if m else None
+        sdev = STD_RE.search(core)
+        std = float(sdev.group(1)) if sdev else None
+        err = re.sub(MEAN_RE, "", core)
+        err = re.sub(STD_RE, "", err).strip()
+        return {"core": core, "mean": mean, "std": std, "error": (err if err else None)}
+    return {"before": extract("BEFORE"), "after": extract("AFTER")}
 
 @app.post("/api/bench/run")
 def bench_run(req: BenchRunReq, request: Request):
@@ -185,46 +179,40 @@ def bench_run(req: BenchRunReq, request: Request):
     job_dir = ensure_sandbox(os.path.join(ROOT_DIR, req.jobId))
     meta_path = os.path.join(job_dir, "meta.json")
     workload_path = os.path.join(job_dir, "workload.py")
+    patch_path = os.path.join(job_dir, "patch.diff")
     if not (os.path.exists(meta_path) and os.path.exists(workload_path)):
         raise HTTPException(400, "invalid jobId")
     with open(meta_path, "r", encoding="utf-8") as f:
         meta = json.load(f)
     image = meta.get("image")
 
-    # Pull image (best-effort)
+    # 预拉取镜像（尽力而为）
     try:
         run_cmd(f"docker pull {image}", timeout=240)
     except Exception:
         pass
 
-    # Helper to exec inside container and collect logs
-    def exec_phase(phase: str):
-        # Mount workload.py into /tmp/workload.py and run /perf.sh
-        cmd = (
-            f"docker run --rm "
-            f"--mount type=bind,src={shlex.quote(workload_path)},dst=/tmp/workload.py "
-            f"{image} /bin/bash -lc "
-            f"\"set +e; echo PERF_START:; python /tmp/workload.py; echo PERF_END:; "
-            f"if [ -f /perf.sh ]; then chmod +x /perf.sh; /perf.sh || true; fi\""
-        )
-        try:
-            cp = run_cmd(cmd, timeout=1800)
-            out = cp.stdout.decode("utf-8", "ignore")
-            core = parse_perf_core(out)
-            # Attach raw if needed
-            core["raw"] = out
-            return core
-        except Exception as e:
-            return {"error": str(e)}
-
-    before = exec_phase("before")
-
-    # Apply patch if present
-    patch_path = os.path.join(job_dir, "patch.diff")
+    # 仅一次进入容器：先 BEFORE，再 git apply，再 AFTER
+    mounts = [f"--mount type=bind,src={shlex.quote(workload_path)},dst=/tmp/workload.py"]
     if os.path.exists(patch_path):
-        # Run an ephemeral container just to apply patch to repo inside image if required; skipped here
-        pass
+        mounts.append(f"--mount type=bind,src={shlex.quote(patch_path)},dst=/tmp/patch.diff")
+    mounts_str = " ".join(mounts)
 
-    after = exec_phase("after")
-
-    return JSONResponse({"ok": True, "before": before, "after": after})
+    cmd = (
+        f"docker run --rm {mounts_str} {image} /bin/bash -lc "
+        f"\"set +e; "
+        f"if [ -f /perf.sh ]; then chmod +x /perf.sh; fi; "
+        f"echo PERF_START:BEFORE; /perf.sh || true; echo PERF_END:BEFORE; "
+        f"if [ ! -f /tmp/patch.diff ]; then echo 'ERROR: docker内部不完全，没有/tmp/patch.diff'; exit 2; fi; "
+        f"cd /testbed 2>/dev/null || true; git apply /tmp/patch.diff || true; cd - >/dev/null 2>&1 || true; "
+        f"echo PERF_START:AFTER; /perf.sh || true; echo PERF_END:AFTER\""
+    )
+    try:
+        cp = run_cmd(cmd, timeout=1800)
+        out = cp.stdout.decode("utf-8", "ignore")
+        parsed = parse_perf_two(out)
+        parsed["before"]["raw"] = out
+        parsed["after"]["raw"] = out
+        return JSONResponse({"ok": True, "before": parsed["before"], "after": parsed["after"]})
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
