@@ -27,10 +27,9 @@
 
   async function submitMeta(){
     const slog = $('submit-log');
-    const email = $('user-email').value.trim();
     const notes = $('user-notes').value.trim();
     try{
-      const res = await fetch(`${ENDPOINT}/api/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, notes, ts: Date.now(), meta: {} }) });
+      const res = await fetch(`${ENDPOINT}/api/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ notes, ts: Date.now(), meta: {} }) });
       const txt = await res.text(); log(slog, txt);
     }catch(e){ log(slog, String(e)); }
   }
