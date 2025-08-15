@@ -138,22 +138,29 @@
               </details>
             </div>
 
-            <div class="results-pair" style="margin-top:10px;">
+            <div class="results-pair" id="results-pair" style="margin-top:10px;">
               <div class="result-box flat-card">
                 <div class="result-title">Before patch</div>
                 <div class="result-metrics">Mean: <code id="before-mean">—</code> · Std: <code id="before-std">—</code>
                   <button class="btn btn-tertiary" id="copy-before" style="margin-left:6px;">Copy</button></div>
-                <pre class="codebox auto" id="before-log"><code></code></pre>
               </div>
               <div class="result-box flat-card">
                 <div class="result-title">After patch</div>
                 <div class="result-metrics">Mean: <code id="after-mean">—</code> · Std: <code id="after-std">—</code>
                   <button class="btn btn-tertiary" id="copy-after" style="margin-left:6px;">Copy</button></div>
-                <pre class="codebox auto" id="after-log"><code></code></pre>
               </div>
             </div>
 
-            <div class="improvement-box flat-card" style="margin-top:10px;">
+            <div class="flat-card" id="before-error-box" style="display:none; margin-top:10px;">
+              <div class="result-title">Before error</div>
+              <pre class="codebox auto" id="before-log"><code></code></pre>
+            </div>
+            <div class="flat-card" id="after-error-box" style="display:none; margin-top:10px;">
+              <div class="result-title">After error</div>
+              <pre class="codebox auto" id="after-log"><code></code></pre>
+            </div>
+
+            <div class="improvement-box flat-card" id="improvement-box" style="margin-top:10px;">
               <div class="improvement-title">Improvement</div>
               <div class="improvement-value" id="bench-diff">Improvement: —</div>
             </div>

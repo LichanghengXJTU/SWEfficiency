@@ -173,7 +173,7 @@ def parse_perf_two(txt: str):
         # Prefer inner markers (from workload), anchored by shell trace + echo and Python run
         inner_core = None
         # Pattern 1: '+ echo PERF_START:' then '+ python ...' then a lone 'PERF_START:' line
-        m1 = re.search(r"(?ms)^\+\s+echo\s+PERF_START:\s*\n^\+\s+python\s+.*\n^PERF_START:\s*\n", seg)
+        m1 = re.search(r"(?ms)^\+\s+echo\s+PERF_START:\s*\n^PERF_START:\s*\n^\+\s+python\s+.*\n", seg)
         # Pattern 2: fallback to a lone 'PERF_START:' line
         m2 = re.search(r"(?m)^PERF_START:\s*$", seg)
         start_idx = None

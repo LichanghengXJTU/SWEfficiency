@@ -193,21 +193,32 @@
       const beforeErr=(data.before?.error||'').trim();
       const afterErr=(data.after?.error||'').trim();
       const hasMetrics = (bMean!=null && bStd!=null && aMean!=null && aStd!=null);
-      const hasFailure = (!!beforeErr || !!afterErr);
+      const hasError = (!!beforeErr || !!afterErr);
 
-      // Conditional log rendering
-      if (hasMetrics && !hasFailure){
-        // success only
-        log($('before-log'), '');
-        log($('after-log'), '');
-      } else if (!hasMetrics && hasFailure){
-        // failure only
-        log($('before-log'), beforeErr);
-        log($('after-log'), afterErr);
-      } else {
-        // both success and failure present
-        log($('before-log'), beforeErr || '');
-        log($('after-log'), afterErr || '');
+      // Show/hide blocks according to states
+      const pair = $('results-pair');
+      const beBox = $('before-error-box');
+      const afBox = $('after-error-box');
+      const impBox = $('improvement-box');
+
+      // default hide
+      pair.style.display = 'none'; beBox.style.display = 'none'; afBox.style.display = 'none'; impBox.style.display = 'none';
+      log($('before-log'), ''); log($('after-log'), '');
+
+      if (hasMetrics && !hasError){
+        // success only: show metrics pair + improvement
+        pair.style.display = '';
+        impBox.style.display = '';
+      } else if (!hasMetrics && hasError){
+        // error only: show errors only
+        if (beforeErr){ beBox.style.display = ''; log($('before-log'), beforeErr); }
+        if (afterErr){ afBox.style.display = ''; log($('after-log'), afterErr); }
+      } else if (hasMetrics && hasError){
+        // success + error: show metrics pair, then both error boxes, then improvement
+        pair.style.display = '';
+        if (beforeErr){ beBox.style.display = ''; log($('before-log'), beforeErr); }
+        if (afterErr){ afBox.style.display = ''; log($('after-log'), afterErr); }
+        impBox.style.display = '';
       }
 
       const bm=parseFloat(data.before?.mean), am=parseFloat(data.after?.mean);
