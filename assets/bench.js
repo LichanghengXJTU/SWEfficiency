@@ -91,31 +91,27 @@
   async function uploadRun(){
     const ulog = $('upload-log');
     const agreed = $('agree-upload').checked;
-    if (!agreed){ log(ulog, 'Please check “I agree to upload to SWEf‑data” first.'); return; }
+    if (!agreed){ log(ulog, 'Local submit only. Tip: check “I agree to upload to SWEf‑data” to enable upload.'); return; }
     try{
-      // Collect current run info from UI
-      const image = $('bench-image').textContent.trim();
-      const idraw = $('bench-id').value.trim();
-      const instance = (idraw.match(/[\w.-]+__[^\s:]+-\d+/)||[])[0] || '';
-      const code = $('bench-code').value;
-      const workload_b64 = btoa(unescape(encodeURIComponent(code)));
-      const before = { mean: parseFloat($('before-mean').textContent)||null, std: parseFloat($('before-std').textContent)||null };
-      const after  = { mean: parseFloat($('after-mean').textContent)||null, std: parseFloat($('after-std').textContent)||null };
-      let improvement = null; if (isFinite(before.mean) && isFinite(after.mean)){ improvement = ((before.mean - after.mean)/before.mean)*100; }
-      const notes = $('user-notes').value.trim();
-      const body = { image, instanceId: instance||undefined, githubUrl: isGithub(idraw)?idraw:undefined, workload_b64, before, after, improvement, notes, ts: Date.now() };
+      const body = collectUploadBody();
       const res = await fetch(`${ENDPOINT}/api/upload_run`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
       const json = await res.json();
       if (json.ok){
-        if (json.needDevice && json.verifyUri && json.userCode){
-          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Then click “Submit & Upload” again.`);
-        } else if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); }
-        else if (json.needToken){ log(ulog, 'GitHub token required. Create a PAT with repo scope and POST to https://127.0.0.1:5050/api/upload/token'); }
+        if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); }
+        else if (json.needDevice && json.verifyUri && json.userCode){ log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Auto-submit is ON.`); clearAutoUpload(); autoUploadOnce(); }
+        else if (json.needToken){ log(ulog, 'GitHub token required.'); }
         else { log(ulog, json.message || 'Thanks! Recorded locally.'); }
       } else {
         log(ulog, json.message || 'Upload failed');
       }
     }catch(e){ log(ulog, String(e)); }
+  }
+
+  async function oneClickSubmit(){
+    // always do a local submit first
+    await submitMeta();
+    // then try upload if agreed
+    if ($('agree-upload')?.checked){ await uploadRun(); }
   }
 
   async function startAuth(){
@@ -198,10 +194,9 @@
     $('btn-bench-cancel')?.addEventListener('click', cancelRun);
     $('copy-before')?.addEventListener('click', () => copyText(`Mean: ${$('before-mean').textContent} | Std: ${$('before-std').textContent}`));
     $('copy-after')?.addEventListener('click', () => copyText(`Mean: ${$('after-mean').textContent} | Std: ${$('after-std').textContent}`));
-    $('btn-submit')?.addEventListener('click', submitMeta);
-    $('btn-upload')?.addEventListener('click', uploadRun);
+    $('btn-one-submit')?.addEventListener('click', oneClickSubmit);
     // Add an Authenticate button dynamically next to upload (to avoid HTML edits if not present)
-    const uploadBtn = $('btn-upload');
+    const uploadBtn = $('btn-one-submit');
     if (uploadBtn){
       const authBtn = document.createElement('button');
       authBtn.className = 'btn'; authBtn.id = 'btn-auth'; authBtn.textContent = 'Authenticate';
