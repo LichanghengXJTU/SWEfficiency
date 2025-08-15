@@ -183,13 +183,32 @@
       const collectPull=(txt)=>{ txt.split(/\n/).forEach(line=>{ if(/pull|download|extract/i.test(line)) pullLines.push(line); }); };
       collectPull(rawBefore); collectPull(rawAfter); if(pullLines.length) log($('pull-log'), pullLines.join('\n'));
 
-      $('before-mean').textContent=(data.before&&data.before.mean!=null)? String(data.before.mean):'—';
-      $('before-std').textContent=(data.before&&data.before.std!=null)? String(data.before.std):'—';
-      log($('before-log'), data.before?.error || data.before?.core || '');
+      const bMean=(data.before&&data.before.mean!=null)? String(data.before.mean):null;
+      const bStd=(data.before&&data.before.std!=null)? String(data.before.std):null;
+      $('before-mean').textContent=bMean??'—'; $('before-std').textContent=bStd??'—';
+      const aMean=(data.after&&data.after.mean!=null)? String(data.after.mean):null;
+      const aStd=(data.after&&data.after.std!=null)? String(data.after.std):null;
+      $('after-mean').textContent=aMean??'—'; $('after-std').textContent=aStd??'—';
 
-      $('after-mean').textContent=(data.after&&data.after.mean!=null)? String(data.after.mean):'—';
-      $('after-std').textContent=(data.after&&data.after.std!=null)? String(data.after.std):'—';
-      log($('after-log'), data.after?.error || data.after?.core || '');
+      const beforeErr=(data.before?.error||'').trim();
+      const afterErr=(data.after?.error||'').trim();
+      const hasMetrics = (bMean!=null && bStd!=null && aMean!=null && aStd!=null);
+      const hasFailure = (!!beforeErr || !!afterErr);
+
+      // Conditional log rendering
+      if (hasMetrics && !hasFailure){
+        // success only
+        log($('before-log'), '');
+        log($('after-log'), '');
+      } else if (!hasMetrics && hasFailure){
+        // failure only
+        log($('before-log'), beforeErr);
+        log($('after-log'), afterErr);
+      } else {
+        // both success and failure present
+        log($('before-log'), beforeErr || '');
+        log($('after-log'), afterErr || '');
+      }
 
       const bm=parseFloat(data.before?.mean), am=parseFloat(data.after?.mean);
       if(isFinite(bm)&&isFinite(am)){ const diff=((bm-am)/bm)*100; const tag=diff>=0?'faster':'slower'; $('bench-diff').textContent=`Improvement: ${tag} ${Math.abs(diff).toFixed(2)}%`; } else { $('bench-diff').textContent='Improvement: —'; }

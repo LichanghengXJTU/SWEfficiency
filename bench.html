@@ -138,31 +138,24 @@
               </details>
             </div>
 
-            <div class="grid grid-12" style="gap:10px; margin-top:10px;">
-              <div class="col-6 col-12-sm">
-                <div class="flat-card">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <div class="meta">Before patch</div>
-                    <div class="meta">Mean: <code id="before-mean">—</code> · Std: <code id="before-std">—</code>
-                      <button class="btn btn-tertiary" id="copy-before" style="margin-left:6px;">Copy</button></div>
-                  </div>
-                  <pre class="codebox auto" id="before-log"><code></code></pre>
-                </div>
+            <div class="results-pair" style="margin-top:10px;">
+              <div class="result-box flat-card">
+                <div class="result-title">Before patch</div>
+                <div class="result-metrics">Mean: <code id="before-mean">—</code> · Std: <code id="before-std">—</code>
+                  <button class="btn btn-tertiary" id="copy-before" style="margin-left:6px;">Copy</button></div>
+                <pre class="codebox auto" id="before-log"><code></code></pre>
               </div>
-              <div class="col-6 col-12-sm">
-                <div class="flat-card">
-                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                    <div class="meta">After patch</div>
-                    <div class="meta">Mean: <code id="after-mean">—</code> · Std: <code id="after-std">—</code>
-                      <button class="btn btn-tertiary" id="copy-after" style="margin-left:6px;">Copy</button></div>
-                  </div>
-                  <pre class="codebox auto" id="after-log"><code></code></pre>
-                </div>
+              <div class="result-box flat-card">
+                <div class="result-title">After patch</div>
+                <div class="result-metrics">Mean: <code id="after-mean">—</code> · Std: <code id="after-std">—</code>
+                  <button class="btn btn-tertiary" id="copy-after" style="margin-left:6px;">Copy</button></div>
+                <pre class="codebox auto" id="after-log"><code></code></pre>
               </div>
             </div>
 
-            <div class="flat-card" style="margin-top:10px;">
-              <div class="meta" id="bench-diff" style="font-weight:600;">Improvement: —</div>
+            <div class="improvement-box flat-card" style="margin-top:10px;">
+              <div class="improvement-title">Improvement</div>
+              <div class="improvement-value" id="bench-diff">Improvement: —</div>
             </div>
           </div>
         </section>
