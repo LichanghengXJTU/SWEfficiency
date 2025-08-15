@@ -453,3 +453,7 @@ body{ overflow-anchor: auto; }
 .improvement-title{ font-weight:800; color:#101114; }
 .improvement-value{ font-weight:900; font-size:16px; color:#0f0f0f; }
 @media (max-width: 960px){ .results-pair{ flex-direction:column; } }
+
+/* Error log boxes sizing within result containers */
+#before-log, #after-log{ max-height: 360px; overflow: auto; }
+@media (max-width: 960px){ #before-log, #after-log{ max-height: 300px; } }

@@ -170,13 +170,46 @@ def parse_perf_two(txt: str):
             seg = txt[s:e]
         except ValueError:
             return {"core": "", "mean": None, "std": None, "error": None}
-        core = seg.strip()
+        # Prefer inner markers (from workload), anchored by shell trace + echo and Python run
+        inner_core = None
+        # Pattern 1: '+ echo PERF_START:' then '+ python ...' then a lone 'PERF_START:' line
+        m1 = re.search(r"(?ms)^\+\s+echo\s+PERF_START:\s*\n^\+\s+python\s+.*\n^PERF_START:\s*\n", seg)
+        # Pattern 2: fallback to a lone 'PERF_START:' line
+        m2 = re.search(r"(?m)^PERF_START:\s*$", seg)
+        start_idx = None
+        if m1:
+            start_idx = m1.end()
+        elif m2:
+            start_idx = m2.end()
+        # Pattern end: a lone 'PERF_END:' line, ideally before '+ echo PERF_END:'
+        m3 = re.search(r"(?ms)^PERF_END:\s*\n^\+\s+echo\s+PERF_END:\s*", seg)
+        m4 = re.search(r"(?m)^PERF_END:\s*$", seg)
+        end_idx = None
+        if m3:
+            end_idx = m3.start()
+        elif m4:
+            end_idx = m4.start()
+        if start_idx is not None and end_idx is not None and end_idx > start_idx:
+            inner_core = seg[start_idx:end_idx]
+        else:
+            # Last resort: simple inner between first PERF_START: and next PERF_END:
+            try:
+                i_s = seg.index("PERF_START:")
+                i_e = seg.index("PERF_END:", i_s)
+                inner_core = seg[i_s + len("PERF_START:"): i_e]
+            except ValueError:
+                inner_core = None
+        core = (inner_core if inner_core is not None else seg).strip()
         m = MEAN_RE.search(core)
         mean = float(m.group(1)) if m else None
         sdev = STD_RE.search(core)
         std = float(sdev.group(1)) if sdev else None
+        # error = core content minus Mean/Std lines
         err = re.sub(MEAN_RE, "", core)
-        err = re.sub(STD_RE, "", err).strip()
+        err = re.sub(STD_RE, "", err)
+        # remove empty lines and shell trace lines
+        err_lines = [ln for ln in (err.splitlines()) if ln.strip() and not ln.lstrip().startswith('+')]
+        err = "\n".join(err_lines).strip()
         return {"core": core, "mean": mean, "std": std, "error": (err if err else None)}
     return {"before": extract("BEFORE"), "after": extract("AFTER")}
 
