@@ -7,6 +7,60 @@
   const log = (el, msg) => { if (!el) return; el.textContent = String(msg ?? ''); };
   const setStatus = (el, text, cls=[]) => { if (!el) return; el.textContent = text; el.classList.remove('ok','fail'); cls.forEach(c => el.classList.add(c)); };
   const copyText = (txt) => { try { navigator.clipboard.writeText(txt); } catch(e){} };
+  // Auto-upload timer
+  let autoUploadTimer = null;
+  let autoUploadBackoffMs = 10000; // default 10s
+  const clearAutoUpload = () => { if (autoUploadTimer){ clearTimeout(autoUploadTimer); autoUploadTimer=null; } };
+
+  function collectUploadBody(){
+    const image = $('bench-image').textContent.trim();
+    const idraw = $('bench-id').value.trim();
+    const instance = (idraw.match(/[\w.-]+__[^\s:]+-\d+/)||[])[0] || '';
+    const code = $('bench-code').value;
+    const workload_b64 = btoa(unescape(encodeURIComponent(code)));
+    const before = { mean: parseFloat($('before-mean').textContent)||null, std: parseFloat($('before-std').textContent)||null };
+    const after  = { mean: parseFloat($('after-mean').textContent)||null, std: parseFloat($('after-std').textContent)||null };
+    let improvement = null; if (isFinite(before.mean) && isFinite(after.mean)){ improvement = ((before.mean - after.mean)/before.mean)*100; }
+    const notes = $('user-notes').value.trim();
+    const body = { image, instanceId: instance||undefined, githubUrl: isGithub(idraw)?idraw:undefined, workload_b64, before, after, improvement, notes, ts: Date.now() };
+    return body;
+  }
+
+  async function autoUploadOnce(){
+    const ulog = $('upload-log');
+    try{
+      if (!$('agree-upload')?.checked){ clearAutoUpload(); return; }
+      // basic sanity: need some metrics and image
+      const body = collectUploadBody();
+      if (!body.image){ clearAutoUpload(); return; }
+      const res = await fetch(`${ENDPOINT}/api/upload_run`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      const json = await res.json();
+      if (json.ok){
+        if (json.uploaded && json.prUrl){ log(ulog, `Thanks! Uploaded. PR: ${json.prUrl}`); clearAutoUpload(); return; }
+        if (json.needDevice && json.verifyUri && json.userCode){
+          // still waiting for user to finish device auth
+          log(ulog, `Waiting for device auth… Open ${json.verifyUri} and enter code: ${json.userCode}`);
+        } else if (json.needToken){
+          log(ulog, 'GitHub token required. Create a PAT with repo scope and POST to https://127.0.0.1:5050/api/upload/token');
+          clearAutoUpload(); return;
+        } else if (json.message){
+          log(ulog, json.message);
+          // Stop if recorded locally (<=15%)
+          if (/Recorded locally/i.test(json.message)){ clearAutoUpload(); return; }
+        } else {
+          log(ulog, 'Submitting… waiting for authorization');
+        }
+      } else {
+        // Non-ok: show message and keep limited retries
+        log(ulog, json.message || 'Upload failed');
+      }
+    }catch(e){
+      log(ulog, String(e));
+    } finally {
+      // schedule next try
+      if (!autoUploadTimer){ autoUploadTimer = setTimeout(()=>{ autoUploadTimer=null; autoUploadOnce(); }, autoUploadBackoffMs); }
+    }
+  }
 
   async function getJSON(path, opts={}){
     const res = await fetch(`${ENDPOINT}${path}`, { ...opts, headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) } });
@@ -70,7 +124,12 @@
       const res = await fetch(`${ENDPOINT}/api/upload/start`, { method:'POST' });
       const json = await res.json();
       if (json.ok && json.needDevice){
-        log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. After authorization, click “Submit & Upload”.`);
+        if ($('agree-upload')?.checked){
+          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Auto-submit is ON and will complete after authorization.`);
+          clearAutoUpload(); autoUploadOnce();
+        } else {
+          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Tip: check “I agree to upload to SWEf‑data” to enable auto-submit.`);
+        }
       } else {
         log(ulog, json.message || 'Unexpected response while starting authentication');
       }

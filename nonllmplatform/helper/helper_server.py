@@ -308,13 +308,30 @@ def upload_run(req: UploadReq, request: Request):
     image = req.image or (f"docker.io/sweperf/sweperf_annotate:{instance}" if instance else req.image)
 
     # Local audit
+    # Normalize timestamp to seconds (handle ms and string inputs)
+    try:
+        _ts_raw = req.ts if (req.ts is not None) else int(time.time())
+        _ts_float = float(_ts_raw)
+        if _ts_float > 1e12:  # likely milliseconds
+            _ts_float = _ts_float / 1000.0
+        _ts_norm = int(_ts_float)
+    except Exception:
+        _ts_norm = int(time.time())
+
+    # Decode workload_b64 into UTF-8 string for human-readable storage
+    workload_str = None
+    try:
+        workload_str = base64.b64decode(req.workload_b64).decode("utf-8", "replace") if req.workload_b64 else None
+    except Exception:
+        workload_str = None
+
     record = {
         "id": f"job-{int(time.time())}-{secrets.token_hex(4)}",
-        "ts": req.ts or int(time.time()),
+        "ts": _ts_norm,
         "image": image,
         "instanceId": instance,
         "githubUrl": req.githubUrl,
-        "workload_b64": req.workload_b64,
+        "workload": workload_str,
         "before": req.before,
         "after": req.after,
         "improvement": req.improvement,
@@ -452,13 +469,62 @@ def upload_run(req: UploadReq, request: Request):
     try:
         # Get repo info
         repo = DATA_REPO
-        s = requests.get(f"{GITHUB_API}/repos/{repo}", headers=gh_headers(token)).json()
+        s_resp = requests.get(f"{GITHUB_API}/repos/{repo}", headers=gh_headers(token))
+        s_resp.raise_for_status()
+        s = s_resp.json()
         default_branch = s.get("default_branch", "main")
-        ref = requests.get(f"{GITHUB_API}/repos/{repo}/git/ref/heads/{default_branch}", headers=gh_headers(token)).json()
-        base_sha = ref.get("object", {}).get("sha")
+
+        # Resolve base sha of default branch (try git/ref, fallback to branches API)
+        base_sha = None
+        ref_resp = requests.get(f"{GITHUB_API}/repos/{repo}/git/ref/heads/{default_branch}", headers=gh_headers(token))
+        if ref_resp.ok:
+            try:
+                base_sha = (ref_resp.json().get("object") or {}).get("sha")
+            except Exception:
+                base_sha = None
+        if not base_sha:
+            br_resp = requests.get(f"{GITHUB_API}/repos/{repo}/branches/{default_branch}", headers=gh_headers(token))
+            if br_resp.ok:
+                try:
+                    base_sha = (br_resp.json().get("commit") or {}).get("sha")
+                except Exception:
+                    base_sha = None
+        if not base_sha or not isinstance(base_sha, str) or len(base_sha) < 7:
+            return JSONResponse({
+                "ok": False,
+                "uploaded": False,
+                "message": f"Cannot resolve base SHA for {repo}@{default_branch}."
+            }, status_code=502)
+
         branch = f"submission-{instance}-{date_str}-{secrets.token_hex(3)}"
-        # create branch
-        requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json={"ref": f"refs/heads/{branch}", "sha": base_sha}).raise_for_status()
+        # create branch (retry once if reference already exists)
+        create_payload = {"ref": f"refs/heads/{branch}", "sha": base_sha}
+        create_resp = requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json=create_payload)
+        if create_resp.status_code == 422:
+            try:
+                err_json = create_resp.json()
+            except Exception:
+                err_json = {"message": create_resp.text}
+            msg = (err_json.get("message") or "").lower()
+            if "already exists" in msg or "reference already exists" in msg:
+                branch = f"{branch}-{secrets.token_hex(2)}"
+                create_payload = {"ref": f"refs/heads/{branch}", "sha": base_sha}
+                create_resp = requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json=create_payload)
+        try:
+            create_resp.raise_for_status()
+        except Exception:
+            # Bubble up detailed github error
+            try:
+                detail = create_resp.json()
+            except Exception:
+                detail = {"message": create_resp.text}
+            return JSONResponse({
+                "ok": False,
+                "uploaded": False,
+                "message": f"Create ref failed: {detail.get('message','') or create_resp.text}",
+                "detail": detail
+            }, status_code=create_resp.status_code or 500)
+
         # put content
         content_b64 = base64.b64encode(json.dumps(record, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
         put = requests.put(f"{GITHUB_API}/repos/{repo}/contents/{rel_path}", headers=gh_headers(token), json={
