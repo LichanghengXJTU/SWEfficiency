@@ -162,7 +162,7 @@ placeholder line 3</code></pre>
                   <div class="meta" style="margin-top:10px; font-weight:600;">1) Download helper (macOS):</div>
                   <div class="meta">One‑line install and run the local Helper (HTTPS, 127.0.0.1:5050).</div>
                   <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -c "$(curl -fsSL https://lichanghengxjtu.github.io/SWEf/nonllmplatform/downloadhelper/install_helper.sh)"</code></pre>
+                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -lc &apos;curl -fsSL https://lichanghengxjtu.github.io/SWEf/nonllmplatform/downloadhelper/install_helper.sh | bash&apos;</code></pre>
                     <button class="btn btn-tertiary" type="button" data-copy-target="code-install">Copy</button>
                   </div>
 
@@ -176,7 +176,7 @@ placeholder line 3</code></pre>
                   <div class="meta" style="margin-top:14px; font-weight:600;">3) Uninstall helper:</div>
                   <div class="meta">Stop the LaunchAgent and remove installed files and work dir.</div>
                   <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id - u)/com.sweperf.helper || true && rm -f ~/Library/LaunchAgents/com.sweperf.helper.plist && rm -rf ~/.sweperf ~/SweperfWork</code></pre>
+                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id -u)/com.sweperf.helper || true; rm -f ~/Library/LaunchAgents/com.sweperf.helper.plist; rm -rf ~/.sweperf ~/SweperfWork</code></pre>
                     <button class="btn btn-tertiary" type="button" data-copy-target="code-uninstall">Copy</button>
                   </div>
 

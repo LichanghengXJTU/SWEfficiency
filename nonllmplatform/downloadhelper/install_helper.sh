@@ -8,8 +8,8 @@ set -euo pipefail
 # - Configures LaunchAgent to autostart helper on login
 # - Idempotent: skips steps when already satisfied
 
-ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-HELPER_DIR="$ROOT_DIR/nonllmplatform/helper"
+# Fixed absolute install location for helper (single source of truth)
+HELPER_DIR="$HOME/.sweperf/helper"
 LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.sweperf.helper.plist"
 CERT_DIR="$HOME/.sweperf/certs"
 CERT_PEM="$CERT_DIR/localhost.pem"
@@ -42,7 +42,7 @@ bootstrap_helper_from_remote(){
 }
 
 ensure_helper_layout(){
-  # If helper directory not present or missing required files, bootstrap from remote
+  # Always prefer remote-synced helper under a fixed absolute path
   if [[ ! -d "$HELPER_DIR" ]] || [[ ! -f "$HELPER_DIR/run.sh" ]] || [[ ! -f "$HELPER_DIR/requirements.txt" ]]; then
     bootstrap_helper_from_remote
   fi
