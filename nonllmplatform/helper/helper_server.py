@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import re, secrets
 from datetime import datetime
+import hashlib
 import base64, requests
 
 def env_list(name: str, default: List[str]) -> List[str]:
@@ -462,8 +463,21 @@ def upload_run(req: UploadReq, request: Request):
     # Build path Non_LLM_user_data/<instance>/<YYYYMMDD>.json
     if not instance:
         return JSONResponse({"ok": False, "uploaded": False, "message": "instanceId missing; cannot determine upload path."}, status_code=400)
-    date_str = datetime.utcfromtimestamp(record["ts"]).strftime("%Y%m%d")
-    rel_path = f"{DATA_PATH}/{instance}/{date_str}.json"
+    # Compute per-minute path and content fingerprint (dedup within the same day)
+    _dt = datetime.utcfromtimestamp(record["ts"])
+    date_str = _dt.strftime("%Y%m%d")
+    hhmm = _dt.strftime("%H%M")
+    # fingerprint over key fields
+    _dedup_key = json.dumps({
+        "instanceId": instance,
+        "workload": record.get("workload"),
+        "before": record.get("before"),
+        "after": record.get("after"),
+        "improvement": record.get("improvement"),
+        "notes": record.get("notes")
+    }, ensure_ascii=False, sort_keys=True)
+    _hash8 = hashlib.sha256(_dedup_key.encode("utf-8")).hexdigest()[:8]
+    rel_path = f"{DATA_PATH}/{instance}/{date_str}/{hhmm}-{_hash8}.json"
 
     # Create branch and PR
     try:
@@ -473,7 +487,7 @@ def upload_run(req: UploadReq, request: Request):
         s_resp.raise_for_status()
         s = s_resp.json()
         default_branch = s.get("default_branch", "main")
-
+ 
         # Resolve base sha of default branch (try git/ref, fallback to branches API)
         base_sha = None
         ref_resp = requests.get(f"{GITHUB_API}/repos/{repo}/git/ref/heads/{default_branch}", headers=gh_headers(token))
@@ -495,47 +509,77 @@ def upload_run(req: UploadReq, request: Request):
                 "uploaded": False,
                 "message": f"Cannot resolve base SHA for {repo}@{default_branch}."
             }, status_code=502)
+ 
+        # Deterministic branch per instance-minute to reduce duplicates
+        minute_str = _dt.strftime("%Y%m%d-%H%M")
+        branch = f"submission-{instance}-{minute_str}"
 
-        branch = f"submission-{instance}-{date_str}-{secrets.token_hex(3)}"
-        # create branch (retry once if reference already exists)
-        create_payload = {"ref": f"refs/heads/{branch}", "sha": base_sha}
-        create_resp = requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json=create_payload)
-        if create_resp.status_code == 422:
+        # Dedup against default branch within the same day by content hash
+        dir_on_default = f"{DATA_PATH}/{instance}/{date_str}"
+        list_resp = requests.get(f"{GITHUB_API}/repos/{repo}/contents/{dir_on_default}", headers=gh_headers(token), params={"ref": default_branch})
+        if list_resp.ok and isinstance(list_resp.json(), list):
             try:
-                err_json = create_resp.json()
+                names = [it.get("name","") for it in list_resp.json() if isinstance(it, dict)]
             except Exception:
-                err_json = {"message": create_resp.text}
-            msg = (err_json.get("message") or "").lower()
-            if "already exists" in msg or "reference already exists" in msg:
-                branch = f"{branch}-{secrets.token_hex(2)}"
-                create_payload = {"ref": f"refs/heads/{branch}", "sha": base_sha}
-                create_resp = requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json=create_payload)
-        try:
-            create_resp.raise_for_status()
-        except Exception:
-            # Bubble up detailed github error
-            try:
-                detail = create_resp.json()
-            except Exception:
-                detail = {"message": create_resp.text}
-            return JSONResponse({
-                "ok": False,
-                "uploaded": False,
-                "message": f"Create ref failed: {detail.get('message','') or create_resp.text}",
-                "detail": detail
-            }, status_code=create_resp.status_code or 500)
+                names = []
+            if any(name.endswith(f"-{_hash8}.json") for name in names):
+                return JSONResponse({
+                    "ok": True,
+                    "uploaded": False,
+                    "message": "Identical submission exists today; skipped.",
+                    "path": f"{dir_on_default}/*-{_hash8}.json"
+                })
 
-        # put content
-        content_b64 = base64.b64encode(json.dumps(record, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
-        put = requests.put(f"{GITHUB_API}/repos/{repo}/contents/{rel_path}", headers=gh_headers(token), json={
-            "message": f"add Non-LLM user data {instance} {date_str}",
-            "content": content_b64,
-            "branch": branch
-        })
-        put.raise_for_status()
-        # create PR
+        # Ensure branch exists (idempotent)
+        ref_check = requests.get(f"{GITHUB_API}/repos/{repo}/git/ref/heads/{branch}", headers=gh_headers(token))
+        if ref_check.status_code == 404:
+            create_payload = {"ref": f"refs/heads/{branch}", "sha": base_sha}
+            create_resp = requests.post(f"{GITHUB_API}/repos/{repo}/git/refs", headers=gh_headers(token), json=create_payload)
+            if not create_resp.ok:
+                try:
+                    detail = create_resp.json()
+                except Exception:
+                    detail = {"message": create_resp.text}
+                return JSONResponse({
+                    "ok": False,
+                    "uploaded": False,
+                    "message": f"Create ref failed: {detail.get('message','') or create_resp.text}",
+                    "detail": detail
+                }, status_code=create_resp.status_code or 500)
+
+        # Ensure content exists on the branch at rel_path (create if missing)
+        getc = requests.get(f"{GITHUB_API}/repos/{repo}/contents/{rel_path}?ref={branch}", headers=gh_headers(token))
+        if getc.status_code == 404:
+            content_b64 = base64.b64encode(json.dumps(record, ensure_ascii=False, indent=2).encode("utf-8")).decode("utf-8")
+            put = requests.put(f"{GITHUB_API}/repos/{repo}/contents/{rel_path}", headers=gh_headers(token), json={
+                "message": f"add Non-LLM user data {instance} {date_str} {hhmm}",
+                "content": content_b64,
+                "branch": branch
+            })
+            if not put.ok:
+                try:
+                    detail = put.json()
+                except Exception:
+                    detail = {"message": put.text}
+                return JSONResponse({
+                    "ok": False,
+                    "uploaded": False,
+                    "message": f"Put content failed: {detail.get('message','') or put.text}",
+                    "detail": detail
+                }, status_code=put.status_code or 500)
+
+        # If a PR already exists for this branch, return it (idempotent)
+        owner = repo.split('/')[0] if '/' in repo else repo
+        prs = requests.get(f"{GITHUB_API}/repos/{repo}/pulls", headers=gh_headers(token), params={"state": "open", "head": f"{owner}:{branch}"})
+        if prs.ok:
+            lst = prs.json() if isinstance(prs.json(), list) else []
+            if lst:
+                pr_url = lst[0].get("html_url")
+                return JSONResponse({"ok": True, "uploaded": True, "prUrl": pr_url, "path": rel_path})
+
+        # Otherwise create a new PR
         pr = requests.post(f"{GITHUB_API}/repos/{repo}/pulls", headers=gh_headers(token), json={
-            "title": f"Non-LLM user data: {instance}/{date_str}.json",
+            "title": f"Non-LLM user data: {instance}/{date_str}/{hhmm}-{_hash8}.json",
             "head": branch,
             "base": default_branch,
             "body": "Automated submission from SWEf Helper"

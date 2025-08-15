@@ -9,7 +9,10 @@
   const copyText = (txt) => { try { navigator.clipboard.writeText(txt); } catch(e){} };
   // Auto-upload timer
   let autoUploadTimer = null;
-  let autoUploadBackoffMs = 10000; // default 10s
+  let autoUploadBackoffMs = 10 * 60 * 1000; // 10 minutes
+  let autoUploadAttempts = 0;
+  const autoUploadMaxAttempts = 3;
+  const dailyClickLocks = new Set(); // key: instance+YYYYMMDD to ensure single immediate attempt per click
   const clearAutoUpload = () => { if (autoUploadTimer){ clearTimeout(autoUploadTimer); autoUploadTimer=null; } };
 
   function collectUploadBody(){
@@ -30,6 +33,7 @@
     const ulog = $('upload-log');
     try{
       if (!$('agree-upload')?.checked){ clearAutoUpload(); return; }
+      if (autoUploadAttempts >= autoUploadMaxAttempts){ clearAutoUpload(); return; }
       // basic sanity: need some metrics and image
       const body = collectUploadBody();
       if (!body.image){ clearAutoUpload(); return; }
@@ -46,7 +50,7 @@
         } else if (json.message){
           log(ulog, json.message);
           // Stop if recorded locally (<=15%)
-          if (/Recorded locally/i.test(json.message)){ clearAutoUpload(); return; }
+          if (/Recorded locally/i.test(json.message) || /Identical submission exists/i.test(json.message)){ clearAutoUpload(); return; }
         } else {
           log(ulog, 'Submitting… waiting for authorization');
         }
@@ -58,7 +62,8 @@
       log(ulog, String(e));
     } finally {
       // schedule next try
-      if (!autoUploadTimer){ autoUploadTimer = setTimeout(()=>{ autoUploadTimer=null; autoUploadOnce(); }, autoUploadBackoffMs); }
+      autoUploadAttempts++;
+      if (!autoUploadTimer && autoUploadAttempts < autoUploadMaxAttempts){ autoUploadTimer = setTimeout(()=>{ autoUploadTimer=null; autoUploadOnce(); }, autoUploadBackoffMs); }
     }
   }
 
@@ -111,7 +116,21 @@
     // always do a local submit first
     await submitMeta();
     // then try upload if agreed
-    if ($('agree-upload')?.checked){ await uploadRun(); }
+    if ($('agree-upload')?.checked){
+      // lock per instance+date to avoid rapid duplicate clicks
+      const idraw = $('bench-id').value.trim();
+      const instance = (idraw.match(/[\w.-]+__[^\s:]+-\d+/)||[])[0] || '';
+      const today = new Date(); const dd = String(today.getUTCDate()).padStart(2,'0'); const mm = String(today.getUTCMonth()+1).padStart(2,'0'); const yyyy = today.getUTCFullYear();
+      const key = `${instance}-${yyyy}${mm}${dd}`;
+      if (dailyClickLocks.has(key)){
+        // already attempted once this day for this instance in this page session
+        return;
+      }
+      dailyClickLocks.add(key);
+      autoUploadAttempts = 0; clearAutoUpload();
+      await uploadRun(); // immediate attempt once
+      // background retries (at most 2 more) handled by autoUploadOnce() in case of needDevice
+    }
   }
 
   async function startAuth(){
@@ -201,7 +220,7 @@
       const authBtn = document.createElement('button');
       authBtn.className = 'btn'; authBtn.id = 'btn-auth'; authBtn.textContent = 'Authenticate';
       uploadBtn.parentElement.insertBefore(authBtn, uploadBtn);
-      authBtn.addEventListener('click', startAuth);
+      authBtn.addEventListener('click', ()=>{ autoUploadAttempts = 0; clearAutoUpload(); startAuth(); });
     }
     health();
   });
