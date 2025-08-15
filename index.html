@@ -169,7 +169,7 @@ placeholder line 3</code></pre>
                   <div class="meta" style="margin-top:14px; font-weight:600;">2) Restart helper:</div>
                   <div class="meta">Kickstart the LaunchAgent to restart the Helper immediately.</div>
                   <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-restart">launchctl kickstart -k gui/$(id -u)/com.sweperf.helper</code></pre>
+                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-restart">launchctl bootout gui/$(id -u)/com.sweperf.helper || true; launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.sweperf.helper.plist; launchctl enable gui/$(id -u)/com.sweperf.helper; launchctl kickstart -k gui/$(id -u)/com.sweperf.helper</code></pre>
                     <button class="btn btn-tertiary" type="button" data-copy-target="code-restart">Copy</button>
                   </div>
 
