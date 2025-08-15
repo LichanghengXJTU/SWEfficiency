@@ -31,6 +31,7 @@
 
   async function autoUploadOnce(){
     const ulog = $('upload-log');
+    let shouldRetry = false;
     try{
       if (!$('agree-upload')?.checked){ clearAutoUpload(); return; }
       if (autoUploadAttempts >= autoUploadMaxAttempts){ clearAutoUpload(); return; }
@@ -54,16 +55,22 @@
         } else {
           log(ulog, 'Submitting… waiting for authorization');
         }
+        // Any HTTP 200 OK response: stop auto retries by default
+        clearAutoUpload(); return;
       } else {
         // Non-ok: show message and keep limited retries
         log(ulog, json.message || 'Upload failed');
+        if (!res.ok) shouldRetry = true;
       }
     }catch(e){
       log(ulog, String(e));
+      shouldRetry = true;
     } finally {
       // schedule next try
-      autoUploadAttempts++;
-      if (!autoUploadTimer && autoUploadAttempts < autoUploadMaxAttempts){ autoUploadTimer = setTimeout(()=>{ autoUploadTimer=null; autoUploadOnce(); }, autoUploadBackoffMs); }
+      if (shouldRetry){
+        autoUploadAttempts++;
+        if (!autoUploadTimer && autoUploadAttempts < autoUploadMaxAttempts){ autoUploadTimer = setTimeout(()=>{ autoUploadTimer=null; autoUploadOnce(); }, autoUploadBackoffMs); }
+      }
     }
   }
 
