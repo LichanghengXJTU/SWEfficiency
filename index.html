@@ -185,35 +185,36 @@ placeholder line 3</code></pre>
               <div class="col-7 col-12-sm">
                 <div class="flat-card">
                   <h4 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Install Local Helper</h4>
-                  <div id="helper-install-status" class="meta">Detecting local Helper…</div>
-                  <p style="margin:0 0 6px 0; color:#0f0f0f; font-size:15px; line-height:1.6;">This page explains the Helper. We recommend reading it before installing and running the Helper and performing the benchmark.</div>
-                  <div class="cta-row" style="gap:10px; margin-top:8px; justify-content:flex-start;">
-                    <a class="btn btn-secondary" href="helper.html">Learn more about Helper</a>
+                  <div class="helper-ops">
+                    <div id="helper-install-status" class="meta">Detecting local Helper…</div>
+                    <div class="meta" style="margin-top:10px;">This page explains the Helper. We recommend reading it before installing and running the Helper and performing the benchmark.</div>
+                    <div class="cta-row" style="gap:10px; margin-top:8px; justify-content:flex-start;">
+                      <a class="btn btn-secondary" href="./helper.html">Learn more about Helper</a>
+                    </div>
+                    
+                    <div class="meta" style="margin-top:10px; font-weight:600;">1) Download helper (macOS):</div>
+                    <div class="meta">One‑line install and run the local Helper (HTTPS, 127.0.0.1:5050). Use the code below to install the helper when you never installed it before or uninstalled it.</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                      <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -lc &apos;curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash&apos;</code></pre>
+                      <button class="btn btn-tertiary" type="button" data-copy-target="code-install">Copy</button>
+                    </div>
+
+                    <div class="meta" style="margin-top:14px; font-weight:600;">2) Restart helper:</div>
+                    <div class="meta">Kickstart the LaunchAgent to restart the Helper immediately. Use the code below to restart the helper when you want to restart it or the helper is not running or need to be updated.</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                      <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-restart">launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.swefficiency.helper.plist; launchctl enable gui/$(id -u)/com.swefficiency.helper; launchctl kickstart -k gui/$(id -u)/com.swefficiency.helper</code></pre>
+                      <button class="btn btn-tertiary" type="button" data-copy-target="code-restart">Copy</button>
+                    </div>
+
+                    <div class="meta" style="margin-top:14px; font-weight:600;">3) Uninstall helper:</div>
+                    <div class="meta">Stop the LaunchAgent and remove installed files and work dir. Use the code below to uninstall the helper when you want to uninstall it. Remember to run this code when you no longer need to benchmark on SWEfficiency.</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                      <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; rm -f ~/Library/LaunchAgents/com.swefficiency.helper.plist; rm -rf ~/.SWEfficiency ~/SWEfficiencyWork</code></pre>
+                      <button class="btn btn-tertiary" type="button" data-copy-target="code-uninstall">Copy</button>
+                    </div>
+
+                    <div class="meta" style="margin-top:10px;">After installation, go to <a href="bench.html">Non‑LLM Bench</a> to run Docker checks.</div>
                   </div>
-
-                  <div class="meta" style="margin-top:10px; font-weight:600;">1) Download helper (macOS):</div>
-                  <div class="meta">One‑line install and run the local Helper (HTTPS, 127.0.0.1:5050). Use the code below to install the helper when you never installed it before or uninstalled it.</div>
-                  <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -lc &apos;curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash&apos;</code></pre>
-                    <button class="btn btn-tertiary" type="button" data-copy-target="code-install">Copy</button>
-                  </div>
-
-                  <div class="meta" style="margin-top:14px; font-weight:600;">2) Restart helper:</div>
-                  <div class="meta">Kickstart the LaunchAgent to restart the Helper immediately. Use the code below to restart the helper when you want to restart it or the helper is not running or need to be updated.</div>
-                  <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-restart">launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.swefficiency.helper.plist; launchctl enable gui/$(id -u)/com.swefficiency.helper; launchctl kickstart -k gui/$(id -u)/com.swefficiency.helper</code></pre>
-                    <button class="btn btn-tertiary" type="button" data-copy-target="code-restart">Copy</button>
-                  </div>
-
-                  <div class="meta" style="margin-top:14px; font-weight:600;">3) Uninstall helper:</div>
-                  <div class="meta">Stop the LaunchAgent and remove installed files and work dir. Use the code below to uninstall the helper when you want to uninstall it. Remember to run this code when you no longer need to benchmark on SWEfficiency.</div>
-                  <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; rm -f ~/Library/LaunchAgents/com.swefficiency.helper.plist; rm -rf ~/.SWEfficiency ~/SWEfficiencyWork</code></pre>
-                    <button class="btn btn-tertiary" type="button" data-copy-target="code-uninstall">Copy</button>
-                  </div>
-
-                  <div class="meta" style="margin-top:10px;">After installation, go to <a href="bench.html">Non‑LLM Bench</a> to run Docker checks.</div>
-
                 </div>
               </div>
               <!-- TODO: Here to add our other platforms (LLM Bench, LLM-based Correctness Checker, etc.), please add the description and code here in the future -->
