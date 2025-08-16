@@ -129,16 +129,22 @@ write_launchagent(){
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>com.swefficiency.helper</string>
+  <key>WorkingDirectory</key><string>$(printf %s "$HELPER_DIR")</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>cd "$HELPER_DIR" && PORT=$PORT SWEF_ALLOWED_ORIGINS="${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}" ./run.sh</string>
+    <string>./run.sh</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PORT</key><string>$(printf %s "$PORT")</string>
+    <key>SWEF_ALLOWED_ORIGINS</key><string>$(printf %s "${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}")</string>
+  </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$HOME/Library/Logs/swefficiency-helper.log</string>
-  <key>StandardErrorPath</key><string>$HOME/Library/Logs/swefficiency-helper.err</string>
+  <key>StandardOutPath</key><string>$(printf %s "$HOME")/Library/Logs/swefficiency-helper.log</string>
+  <key>StandardErrorPath</key><string>$(printf %s "$HOME")/Library/Logs/swefficiency-helper.err</string>
 </dict></plist>
 PLIST
   mkdir -p "$(dirname "$LAUNCH_PLIST")"
