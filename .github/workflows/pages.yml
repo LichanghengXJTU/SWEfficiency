@@ -24,7 +24,7 @@ jobs:
           set -e
           rm -rf _site
           mkdir -p _site
-          cp -R index.html leaderboard.html bench.html contact.html assets _site/
+          cp -R index.html leaderboard.html bench.html contact.html helper.html assets _site/
 
           mkdir -p _site/nonllmplatform/downloadhelper
           cp -R nonllmplatform/downloadhelper/* _site/nonllmplatform/downloadhelper/
