@@ -462,4 +462,8 @@ body{ overflow-anchor: auto; }
 @media (max-width: 960px){ #before-log, #after-log{ max-height: 300px; } }
 
 /* Helper ops block (index Platforms): render descriptive text as black body copy */
-.helper-ops .meta{ color:#0f0f0f; font-size:15px; line-height:1.6; }
+.helper-ops .meta{ color:#0f0f0f; font-size:14px; line-height:1.7; }
+
+/* Helper page body text */
+.helper-page p.meta{ color:#0f0f0f; font-size:14px; line-height:1.7; }
+.helper-page ul{ color:#0f0f0f; font-size:14px; line-height:1.7; }
