@@ -237,4 +237,4 @@ To mention, when user submit their data, we can see it on `https://github.com/Li
 - Avoid renaming or removing container elements with specific ids/classes used by scripts (e.g., `criteria-tabs`, `results-deck`)
 - JSON must be valid UTF‑8 encoded JSON (no trailing commas); if editing on Windows, ensure LF line endings if possible
 - For Links: always include full `https://` URLs
-- For Percentages/speedups: format like `78%`, `1.42×` (the site recognizes `%` and `×`) 
+- For Percentages/speedups: format like `78%`, `1.42×` (the site recognizes `%` and `×`)  
