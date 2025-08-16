@@ -28,7 +28,7 @@ def env_list(name: str, default: List[str], fallback_names: List[str] = []) -> L
 ALLOWED_ORIGINS = env_list(
     "SWEF_ALLOWED_ORIGINS",
     [
-        "https://LichanghengXJTU.github.io",   # Pages origin (no path)
+        "https://lichanghengxjtu.github.io",   # Pages origin (no path)
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ],
@@ -69,7 +69,9 @@ def ok():
 
 def check_origin(request: Request):
     origin = request.headers.get("origin") or request.headers.get("referer", "")
-    if origin and not any(origin.startswith(o) for o in ALLOWED_ORIGINS):
+    origin_lc = (origin or "").lower()
+    allowed_lc = [o.lower() for o in ALLOWED_ORIGINS]
+    if origin and not any(origin_lc.startswith(o) for o in allowed_lc):
         raise HTTPException(403, "origin not allowed")
 
 @app.get("/api/health")

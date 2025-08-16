@@ -59,7 +59,7 @@
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Quick install (macOS)</h3>
               <p class="meta">Run this in Terminal (macOS 11+):</p>
-              <pre class="codebox auto"><code>/bin/bash -lc 'curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'</code></pre>
+              <pre class="codebox auto"><code>/bin/bash -lc 'curl -fsSL https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'</code></pre>
               <p class="meta" style="margin-top:6px;">The installer will generate a localhost certificate, create/update a Python venv, install dependencies, write a LaunchAgent, and start the Helper.</p>
             </div>
 
@@ -84,7 +84,7 @@
               <ul class="meta" style="margin:0 0 0 18px;">
                 <li>Local‑only: all sensitive actions run on your machine. Listens on <code>127.0.0.1</code> with HTTPS.</li>
                 <li>HTTPS by default: a self‑signed certificate for localhost is generated and trusted locally.</li>
-                <li>CORS allowlist: by default only allows <code>https://LichanghengXJTU.github.io</code> and <code>http://localhost:8000</code>.</li>
+                <li>CORS allowlist: by default only allows <code>https://lichanghengxjtu.github.io</code> and <code>http://localhost:8000</code>.</li>
                 <li>Docker runs with reduced privileges (no new privileges, limited CPU/memory/PIDs, no network where applicable).</li>
                 <li>No data is uploaded unless you explicitly opt‑in; only the benchmark record (workload text and metrics) is submitted, and only above a threshold.</li>
               </ul>
@@ -107,7 +107,7 @@
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Configuration</h3>
               <ul class="meta" style="margin:0 0 0 18px;">
-                <li><code>SWEF_ALLOWED_ORIGINS</code> – comma‑separated CORS origins (default includes <code>https://LichanghengXJTU.github.io</code>)</li>
+                <li><code>SWEF_ALLOWED_ORIGINS</code> – comma‑separated CORS origins (default includes <code>https://lichanghengxjtu.github.io</code>)</li>
                 <li><code>SWEF_WORK_ROOT</code> – sandbox root (default <code>~/SWEfficiencyWork</code>)</li>
                 <li><code>SWEF_DATA_REPO</code> – GitHub repo to push PRs to (default <code>LichanghengXJTU/SWEf-data</code>)</li>
                 <li><code>SWEF_DATA_PATH</code> – path inside the repo (default <code>Non_LLM_user_data</code>)</li>
@@ -138,7 +138,7 @@
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Troubleshooting</h3>
               <ul class="meta" style="margin:0 0 0 18px;">
                 <li>Browser says certificate is not trusted → Visit <code>https://127.0.0.1:5050/api/health</code> once and accept the local certificate.</li>
-                <li>CORS blocked → Ensure the page origin is in <code>SWEF_ALLOWED_ORIGINS</code> (default includes <code>https://LichanghengXJTU.github.io</code>). Restart the helper after changes.</li>
+                <li>CORS blocked → Ensure the page origin is in <code>SWEF_ALLOWED_ORIGINS</code> (default includes <code>https://lichanghengxjtu.github.io</code>). Restart the helper after changes.</li>
                 <li>GitHub upload requires token → Set <code>SWEF_GH_CLIENT_ID/SECRET</code> for Device Flow, or provide a PAT to <code>/api/upload/token</code> as a fallback.</li>
               </ul>
             </div>

@@ -19,7 +19,7 @@ A small local service that securely bridges the browser (the website) and your m
 ## Quick install (recommended)
 Run this in Terminal (macOS 11+):
 ```bash
-/bin/bash -lc 'curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'
+/bin/bash -lc 'curl -fsSL https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'
 ```
 The installer will:
 - Generate and trust a localhost TLS certificate (`~/.SWEfficiency/certs/`)
@@ -56,7 +56,7 @@ you are ready to go. Then open the Non‑LLM Bench page on the website and click
 ## Privacy & Security
 - Local‑only: all sensitive actions run on your machine. No inbound ports are exposed to the network; it only listens on `127.0.0.1`.
 - HTTPS by default: a self‑signed certificate for localhost is generated and trusted locally.
-- CORS allowlist: by default only allows `https://LichanghengXJTU.github.io` and `http://localhost:8000`. You can override via environment variables.
+- CORS allowlist: by default only allows `https://lichanghengxjtu.github.io` and `http://localhost:8000`. You can override via environment variables.
 - Docker runs with reduced privileges (no new privileges, with limited CPU/mem usage).
 - Helper do need network, but this is only for pulling docker images, which has limited actions.
 - No data is uploaded unless you explicitly opt‑in on the page. Even then, only the benchmark record (workload text and metrics) is submitted to the public repository, and only if the improvement is above the threshold (15%).
@@ -74,7 +74,7 @@ The website calls the following endpoints:
 
 ## Configuration
 Environment variables (set them before starting or in the LaunchAgent):
-- `SWEF_ALLOWED_ORIGINS` – comma‑separated CORS origins (default includes `https://LichanghengXJTU.github.io`)
+- `SWEF_ALLOWED_ORIGINS` – comma‑separated CORS origins (default includes `https://lichanghengxjtu.github.io`)
 - `SWEF_WORK_ROOT` – sandbox root (default `~/SWEfficiencyWork`)
 - `SWEF_DATA_REPO` – GitHub repo to push PRs to (default `LichanghengXJTU/SWEf-data`)
 - `SWEF_DATA_PATH` – path inside the repo (default `Non_LLM_user_data`, just for current version)
@@ -97,7 +97,7 @@ tail -f ~/Library/Logs/SWEfficiency-helper.log ~/Library/Logs/SWEfficiency-helpe
 - Browser says certificate is not trusted
   - Visit `https://127.0.0.1:5050/api/health` once and accept the local certificate.
 - CORS blocked
-  - Ensure the page origin is in `SWEF_ALLOWED_ORIGINS` (default includes `https://LichanghengXJTU.github.io`). Restart the helper after changes.
+  - Ensure the page origin is in `SWEF_ALLOWED_ORIGINS` (default includes `https://lichanghengxjtu.github.io`). Restart the helper after changes.
 - GitHub upload requires token
   - Set `SWEF_GH_CLIENT_ID/SECRET` for Device Flow, or provide a PAT to `/api/upload/token` as a fallback (outdated method).
 
