@@ -5,7 +5,7 @@ set -euo pipefail
 PORT="${PORT:-5050}"
 HOST="127.0.0.1"
 ROOT="${SWEF_WORK_ROOT:-$HOME/SWEfficiencyWork}"
-ALLOWED="${SWEF_ALLOWED_ORIGINS:-https://LichanghengXJTU.github.io,http://localhost:8000}"
+ALLOWED="${SWEF_ALLOWED_ORIGINS:-https://lichanghengxjtu.github.io,http://localhost:8000}"
 CERT="$HOME/.SWEfficiency/certs/localhost.pem"
 KEY="$HOME/.SWEfficiency/certs/localhost-key.pem"
 

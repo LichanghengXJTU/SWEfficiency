@@ -13,13 +13,13 @@ set -euo pipefail
 
 # Fixed absolute install location for helper (single source of truth)
 HELPER_DIR="$HOME/.SWEfficiency/helper"
-LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.SWEfficiency.helper.plist"
+LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.swefficiency.helper.plist"
 CERT_DIR="$HOME/.SWEfficiency/certs"
 CERT_PEM="$CERT_DIR/localhost.pem"
 KEY_PEM="$CERT_DIR/localhost-key.pem"
 PORT="${PORT:-5050}"
-ALLOWED_ORIGINS_DEFAULT="https://LichanghengXJTU.github.io,http://localhost:8000"
-REMOTE_BASE_DEFAULT="https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/helper"
+ALLOWED_ORIGINS_DEFAULT="https://lichanghengxjtu.github.io,http://localhost:8000"
+REMOTE_BASE_DEFAULT="https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/helper"
 REMOTE_BASE="${SWEF_HELPER_BASE:-$REMOTE_BASE_DEFAULT}"
 
 log(){ printf "[install] %s\n" "$*"; }
@@ -39,7 +39,7 @@ bootstrap_helper_from_remote(){
   curl -fsSL "$REMOTE_BASE/requirements.txt" -o "$target_dir/requirements.txt"
   curl -fsSL "$REMOTE_BASE/run.sh" -o "$target_dir/run.sh"
   # plist may or may not exist remotely; try fetch, tolerate 404
-  curl -fsSL "$REMOTE_BASE/plist/com.SWEfficiency.helper.plist" -o "$target_dir/plist/com.SWEfficiency.helper.plist" || true
+  curl -fsSL "$REMOTE_BASE/plist/com.swefficiency.helper.plist" -o "$target_dir/plist/com.swefficiency.helper.plist" || true
   chmod +x "$target_dir/run.sh" || true
   HELPER_DIR="$target_dir"
 }

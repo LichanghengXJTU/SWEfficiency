@@ -28,7 +28,7 @@ def env_list(name: str, default: List[str], fallback_names: List[str] = []) -> L
 ALLOWED_ORIGINS = env_list(
     "SWEF_ALLOWED_ORIGINS",
     [
-        "https://LichanghengXJTU.github.io",   # Pages origin (no path)
+        "https://lichanghengxjtu.github.io",   # Pages origin (no path)
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ],
