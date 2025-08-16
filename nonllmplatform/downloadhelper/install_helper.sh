@@ -13,13 +13,13 @@ set -euo pipefail
 
 # Fixed absolute install location for helper (single source of truth)
 HELPER_DIR="$HOME/.SWEfficiency/helper"
-LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.swefficiency.helper.plist"
+LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.SWEfficiency.helper.plist"
 CERT_DIR="$HOME/.SWEfficiency/certs"
 CERT_PEM="$CERT_DIR/localhost.pem"
 KEY_PEM="$CERT_DIR/localhost-key.pem"
 PORT="${PORT:-5050}"
-ALLOWED_ORIGINS_DEFAULT="https://lichanghengxjtu.github.io,http://localhost:8000"
-REMOTE_BASE_DEFAULT="https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/helper"
+ALLOWED_ORIGINS_DEFAULT="https://LichanghengXJTU.github.io,http://localhost:8000"
+REMOTE_BASE_DEFAULT="https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/helper"
 REMOTE_BASE="${SWEF_HELPER_BASE:-$REMOTE_BASE_DEFAULT}"
 
 log(){ printf "[install] %s\n" "$*"; }
@@ -39,7 +39,7 @@ bootstrap_helper_from_remote(){
   curl -fsSL "$REMOTE_BASE/requirements.txt" -o "$target_dir/requirements.txt"
   curl -fsSL "$REMOTE_BASE/run.sh" -o "$target_dir/run.sh"
   # plist may or may not exist remotely; try fetch, tolerate 404
-  curl -fsSL "$REMOTE_BASE/plist/com.swefficiency.helper.plist" -o "$target_dir/plist/com.swefficiency.helper.plist" || true
+  curl -fsSL "$REMOTE_BASE/plist/com.SWEfficiency.helper.plist" -o "$target_dir/plist/com.SWEfficiency.helper.plist" || true
   chmod +x "$target_dir/run.sh" || true
   HELPER_DIR="$target_dir"
 }
@@ -129,22 +129,16 @@ write_launchagent(){
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>com.swefficiency.helper</string>
-  <key>WorkingDirectory</key><string>$(printf %s "$HELPER_DIR")</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>./run.sh</string>
+    <string>cd "$HELPER_DIR" && PORT=$PORT SWEF_ALLOWED_ORIGINS="${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}" ./run.sh</string>
   </array>
-  <key>EnvironmentVariables</key>
-  <dict>
-    <key>PORT</key><string>$(printf %s "$PORT")</string>
-    <key>SWEF_ALLOWED_ORIGINS</key><string>$(printf %s "${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}")</string>
-  </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$(printf %s "$HOME")/Library/Logs/swefficiency-helper.log</string>
-  <key>StandardErrorPath</key><string>$(printf %s "$HOME")/Library/Logs/swefficiency-helper.err</string>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/swefficiency-helper.log</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/swefficiency-helper.err</string>
 </dict></plist>
 PLIST
   mkdir -p "$(dirname "$LAUNCH_PLIST")"

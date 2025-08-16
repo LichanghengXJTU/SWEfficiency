@@ -107,7 +107,7 @@
   async function uploadRun(){
     const ulog = $('upload-log');
     const agreed = $('agree-upload').checked;
-    if (!agreed){ log(ulog, 'Local submit only. Tip: check “I agree to upload to SWEF‑data” to enable upload.'); return; }
+    if (!agreed){ log(ulog, 'Local submit only. Tip: check “I agree to upload to SWEf‑data” to enable upload.'); return; }
     try{
       const body = collectUploadBody();
       const res = await fetch(`${ENDPOINT}/api/upload_run`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
@@ -154,7 +154,7 @@
           log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Auto-submit is ON and will complete after authorization.`);
           clearAutoUpload(); autoUploadOnce();
         } else {
-          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Tip: check “I agree to upload to SWEF‑data” to enable auto-submit.`);
+          log(ulog, `Open ${json.verifyUri} and enter code: ${json.userCode}. Tip: check “I agree to upload to SWEf‑data” to enable auto-submit.`);
         }
       } else {
         log(ulog, json.message || 'Unexpected response while starting authentication');

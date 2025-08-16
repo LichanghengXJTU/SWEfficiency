@@ -341,7 +341,7 @@ body{ scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.40) rgba(0,0,0,0.08);
 .status-pill.ok{ background:#eefbf3; color:#0a7a3e; border-color:#cceede; }
 .status-pill.fail{ background:#fff1f1; color:#b11b1b; border-color:#f0caca; }
 .lang-pill{ display:inline-flex; align-items:center; padding:6px 10px; border-radius:9999px; border:1px solid rgba(16,17,20,0.10); background:#fff; font-weight:700; font-size:12px; color:#2a2f35; }
-.meta{ color:#6a7079; font-size:12px; line-height:1.5; }
+.meta{ color:#0f0f0f; font-size:12px; line-height:1.5; }
 .meta .metric{ font-weight:900; font-size:14px; color:#0f0f0f; background:#fff; border:1px solid rgba(16,17,20,0.12); padding:2px 6px; border-radius:6px; }
 .codebox{ font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; height: 180px; overflow:auto; }
 .codebox.sm{ height: 140px; }
@@ -460,10 +460,3 @@ body{ overflow-anchor: auto; }
 /* Error log boxes sizing within result containers */
 #before-log, #after-log{ max-height: 360px; overflow: auto; }
 @media (max-width: 960px){ #before-log, #after-log{ max-height: 300px; } }
-
-/* Helper ops block (index Platforms): render descriptive text as black body copy */
-.helper-ops .meta{ color:#0f0f0f; font-size:14px; line-height:1.7; }
-
-/* Helper page body text */
-.helper-page p.meta{ color:#0f0f0f; font-size:14px; line-height:1.7; }
-.helper-page ul{ color:#0f0f0f; font-size:14px; line-height:1.7; }
