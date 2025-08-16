@@ -37,7 +37,7 @@
 
             <div class="flat-card">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">What is it?</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>A FastAPI server listening on <code>127.0.0.1:5050</code> (HTTPS preferred)</li>
                 <li>Installed under <code>~/.SWEfficiency/helper</code> (code + Python venv)</li>
                 <li>Auto‑started at login via a LaunchAgent <code>com.swefficiency.helper</code></li>
@@ -48,7 +48,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">What does it help with?</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>Health detection for the Non‑LLM Bench page</li>
                 <li>Local Docker availability checks</li>
                 <li>Prepare and run benchmark jobs (Before/After) with your workload code</li>
@@ -81,7 +81,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Privacy & Security</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>Local‑only: all sensitive actions run on your machine. Listens on <code>127.0.0.1</code> with HTTPS.</li>
                 <li>HTTPS by default: a self‑signed certificate for localhost is generated and trusted locally.</li>
                 <li>CORS allowlist: by default only allows <code>https://LichanghengXJTU.github.io</code> and <code>http://localhost:8000</code>.</li>
@@ -92,7 +92,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">HTTP API (for reference)</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li><code>GET /api/health</code> – helper health info</li>
                 <li><code>GET /api/docker/check</code> – check Docker availability</li>
                 <li><code>POST /api/bench/prepare</code> – create a job and write your workload code</li>
@@ -106,7 +106,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Configuration</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li><code>SWEF_ALLOWED_ORIGINS</code> – comma‑separated CORS origins (default includes <code>https://LichanghengXJTU.github.io</code>)</li>
                 <li><code>SWEF_WORK_ROOT</code> – sandbox root (default <code>~/SWEfficiencyWork</code>)</li>
                 <li><code>SWEF_DATA_REPO</code> – GitHub repo to push PRs to (default <code>LichanghengXJTU/SWEf-data</code>)</li>
@@ -117,7 +117,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Logs</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>Service stdout: <code>~/Library/Logs/swefficiency-helper.log</code></li>
                 <li>Service stderr: <code>~/Library/Logs/swefficiency-helper.err</code></li>
               </ul>
@@ -127,7 +127,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Requirements</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>macOS 11+</li>
                 <li>Python 3.12 preferred (the installer will create a venv)</li>
                 <li>Docker Desktop (for running benchmarks)</li>
@@ -136,7 +136,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Troubleshooting</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li>Browser says certificate is not trusted → Visit <code>https://127.0.0.1:5050/api/health</code> once and accept the local certificate.</li>
                 <li>CORS blocked → Ensure the page origin is in <code>SWEF_ALLOWED_ORIGINS</code> (default includes <code>https://LichanghengXJTU.github.io</code>). Restart the helper after changes.</li>
                 <li>GitHub upload requires token → Set <code>SWEF_GH_CLIENT_ID/SECRET</code> for Device Flow, or provide a PAT to <code>/api/upload/token</code> as a fallback.</li>
@@ -145,7 +145,7 @@
 
             <div class="flat-card" style="margin-top:10px;">
               <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">FAQ</h3>
-              <ul class="meta" style="margin:0 0 0 18px;">
+              <ul style="margin:0 0 0 18px; color:#0f0f0f; font-size:15px; line-height:1.6;">
                 <li><b>Does the website upload my local files?</b> No. Only the workload code you paste, metadata, and metrics are used. Actual execution happens locally in Docker.</li>
                 <li><b>Can I disable uploads entirely?</b> Yes. Do not check the “I agree to upload” option; the page will only record locally.</li>
               </ul>

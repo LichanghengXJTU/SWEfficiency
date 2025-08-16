@@ -460,3 +460,6 @@ body{ overflow-anchor: auto; }
 /* Error log boxes sizing within result containers */
 #before-log, #after-log{ max-height: 360px; overflow: auto; }
 @media (max-width: 960px){ #before-log, #after-log{ max-height: 300px; } }
+
+/* Helper ops block (index Platforms): render descriptive text as black body copy */
+.helper-ops .meta{ color:#0f0f0f; font-size:15px; line-height:1.6; }
