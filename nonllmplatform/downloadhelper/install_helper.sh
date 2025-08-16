@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
-
 # install_helper.sh — macOS one-click installer for local helper
 # - Checks/installs Python venv deps (prefers python3.12; fallbacks with ABI3 for 3.13)
 # - Generates and trusts localhost TLS cert (no Homebrew needed)
@@ -8,15 +6,20 @@ set -euo pipefail
 # - Configures LaunchAgent to autostart helper on login
 # - Idempotent: skips steps when already satisfied
 
+# TODO: We will update this script to be more applicable to other platforms later.
+# TODO: We will update this script to be more applicable to other operating systems later.
+
+set -euo pipefail
+
 # Fixed absolute install location for helper (single source of truth)
-HELPER_DIR="$HOME/.sweperf/helper"
-LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.sweperf.helper.plist"
-CERT_DIR="$HOME/.sweperf/certs"
+HELPER_DIR="$HOME/.SWEfficiency/helper"
+LAUNCH_PLIST="$HOME/Library/LaunchAgents/com.SWEfficiency.helper.plist"
+CERT_DIR="$HOME/.SWEfficiency/certs"
 CERT_PEM="$CERT_DIR/localhost.pem"
 KEY_PEM="$CERT_DIR/localhost-key.pem"
 PORT="${PORT:-5050}"
-ALLOWED_ORIGINS_DEFAULT="https://lichanghengxjtu.github.io,http://localhost:8000"
-REMOTE_BASE_DEFAULT="https://lichanghengxjtu.github.io/SWEf/nonllmplatform/helper"
+ALLOWED_ORIGINS_DEFAULT="https://LichanghengXJTU.github.io,http://localhost:8000"
+REMOTE_BASE_DEFAULT="https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/helper"
 REMOTE_BASE="${SWEF_HELPER_BASE:-$REMOTE_BASE_DEFAULT}"
 
 log(){ printf "[install] %s\n" "$*"; }
@@ -28,15 +31,15 @@ require_macos(){
 }
 
 bootstrap_helper_from_remote(){
-  # If local helper layout missing, fetch from published site into ~/.sweperf/helper
-  local target_dir="$HOME/.sweperf/helper"
+  # If local helper layout missing, fetch from published site into ~/.SWEfficiency/helper
+  local target_dir="$HOME/.SWEfficiency/helper"
   log "Bootstrapping helper files into $target_dir from $REMOTE_BASE"
   mkdir -p "$target_dir/plist"
   curl -fsSL "$REMOTE_BASE/helper_server.py" -o "$target_dir/helper_server.py"
   curl -fsSL "$REMOTE_BASE/requirements.txt" -o "$target_dir/requirements.txt"
   curl -fsSL "$REMOTE_BASE/run.sh" -o "$target_dir/run.sh"
   # plist may or may not exist remotely; try fetch, tolerate 404
-  curl -fsSL "$REMOTE_BASE/plist/com.sweperf.helper.plist" -o "$target_dir/plist/com.sweperf.helper.plist" || true
+  curl -fsSL "$REMOTE_BASE/plist/com.SWEfficiency.helper.plist" -o "$target_dir/plist/com.SWEfficiency.helper.plist" || true
   chmod +x "$target_dir/run.sh" || true
   HELPER_DIR="$target_dir"
 }
@@ -125,17 +128,17 @@ write_launchagent(){
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>Label</key><string>com.sweperf.helper</string>
+  <key>Label</key><string>com.swefficiency.helper</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>cd "$HELPER_DIR" && PORT=$PORT SWEP_ALLOWED_ORIGINS="${SWEP_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}" ./run.sh</string>
+    <string>cd "$HELPER_DIR" && PORT=$PORT SWEF_ALLOWED_ORIGINS="${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}" ./run.sh</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$HOME/Library/Logs/sweperf-helper.log</string>
-  <key>StandardErrorPath</key><string>$HOME/Library/Logs/sweperf-helper.err</string>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/swefficiency-helper.log</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/swefficiency-helper.err</string>
 </dict></plist>
 PLIST
   mkdir -p "$(dirname "$LAUNCH_PLIST")"
@@ -146,11 +149,11 @@ PLIST
 
 reload_launchagent(){
   # Unload if exists
-  launchctl bootout "gui/$(id -u)/com.sweperf.helper" >/dev/null 2>&1 || true
+  launchctl bootout "gui/$(id -u)/com.SWEfficiency.helper" >/dev/null 2>&1 || true
   # Load
   launchctl bootstrap "gui/$(id -u)" "$LAUNCH_PLIST"
-  launchctl enable "gui/$(id -u)/com.sweperf.helper"
-  launchctl kickstart -k "gui/$(id -u)/com.sweperf.helper"
+  launchctl enable "gui/$(id -u)/com.SWEfficiency.helper"
+  launchctl kickstart -k "gui/$(id -u)/com.SWEfficiency.helper"
   log "Helper service started on https://127.0.0.1:$PORT"
 }
 

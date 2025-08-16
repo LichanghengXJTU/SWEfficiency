@@ -13,7 +13,7 @@
 </head>
 <body>
   <div class="page-shell">
-    <!-- 顶部：左侧Logo+名称，右侧导航 -->
+    <!-- TODO: This is our navigation links -->
     <header class="hero-header">
       <div class="container-wide hero-header-inner">
         <div class="brand-block">
@@ -34,19 +34,22 @@
     <main>
       <div class="container-wide">
         <div class="page-card">
-          <!-- 主内容：leaderboard 占据主要版面 -->
+          <!-- TODO: This is our leaderboard -->
                 <section class="section">
         <div class="container-wide">
           <h1 class="section-title" style="text-align:center; font-size:42px; letter-spacing:-0.02em; margin:0 0 20px 0;">SWEfficiency Leaderboard</h1>
 
-          <!-- KPI 条 -->
+          <!-- TODO: This is our KPI, please change it to the actual KPI in /assets/data/leaderboard.json -->
           <div class="kpi-strip" style="margin:25px 0 25px 0;">
+            <!-- TODO: This is our total tasks, please change it to the actual total tasks in the future -->
             <div class="kpi-pill"><span>Total Tasks</span><span class="val">tbu</span></div>
+            <!-- TODO: This is our models, please change it to the actual models in the future -->
             <div class="kpi-pill"><span>Models</span><span class="val">tbu</span></div>
+            <!-- TODO: This is our updated, please change it to the actual updated in the future -->
             <div class="kpi-pill"><span>Updated</span><span class="val">tbu</span></div>
           </div>
 
-          <!-- 切换控件 -->
+          <!-- TODO: This is our criteria switcher-->
           <div style="margin-bottom:25px; display:flex; align-items:center; gap:20px; justify-content:space-between; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:10px;">
               <div id="criteria-switcher" class="segmented-control" role="tablist" aria-label="Leaderboard criteria"></div>
@@ -61,25 +64,25 @@
             </div>
           </div>
 
-          <!-- 加载态 -->
+          <!-- TODO: This is our loading state -->
           <div class="leaderboard-loading" id="leaderboard-loading">
             <div class="spinner"></div>
             <span>Loading leaderboard…</span>
           </div>
 
-          <!-- 极简表格外观：去代码框壳，仅保留大表 -->
+          <!-- TODO: This is our leaderboard table -->
           <div class="no-codeframe leaderboard-card fade-enter" id="leaderboard-card" style="display:none;">
             <div id="leaderboard-table" class="leaderboard-table"></div>
           </div>
         </div>
       </section>
 
-        <!-- Contribute 独立一栏（不放链接，后续讨论） -->
+        <!-- TODO: This is our contribute section -->
         <section class="section">
           <div class="container-wide">
             <div class="contribute-card elevate">
               <h3 style="margin:0 0 6px 0;">Contribute</h3>
-              <p class="muted" style="margin:0 0 10px 0;">If you would like to contribute to Sweperf, please consider our platform.</p>
+              <p class="muted" style="margin:0 0 10px 0;">If you would like to contribute to SWEfficiency, please consider our platform.</p>
               <a class="btn btn-secondary" href="index.html#platforms" onclick="try{sessionStorage.setItem('gotoPlatforms','1')}catch(e){}">Go to Platforms</a>
             </div>
           </div>
@@ -99,7 +102,7 @@
     </footer>
   </div>
 
-  <!-- 动态渲染脚本 -->
+  <!-- TODO: This is our dynamic rendering script -->
   <script src="assets/leaderboard.js"></script>
 </body>
 </html>

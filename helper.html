@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Helper — SWEfficiency</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <header class="hero-header">
+    <div class="container-wide hero-header-inner">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/images/logo.png" alt="Harvard Edge Logo"/>
+        <div class="brand-text">
+          <div class="brand-name">SWEfficiency</div>
+        </div>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html#overview">Overview</a>
+        <a href="leaderboard.html">Leaderboard</a>
+        <a href="bench.html">Non-LLM Bench</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container-wide">
+      <div class="page-card flat">
+        <section class="section" style="padding-top:8px;">
+          <div class="container-wide">
+            <h1 class="section-title" style="margin:0 0 10px 0;">About the Helper</h1>
+            <div class="divider"></div>
+
+            <div class="flat-card">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">What is it?</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>A FastAPI server listening on <code>127.0.0.1:5050</code> (HTTPS preferred)</li>
+                <li>Installed under <code>~/.SWEfficiency/helper</code> (code + Python venv)</li>
+                <li>Auto‑started at login via a LaunchAgent <code>com.swefficiency.helper</code></li>
+                <li>Only accepts requests from allowed web origins (CORS)</li>
+                <li>Runs Docker jobs with restricted options (reduced privileges)</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">What does it help with?</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>Health detection for the Non‑LLM Bench page</li>
+                <li>Local Docker availability checks</li>
+                <li>Prepare and run benchmark jobs (Before/After) with your workload code</li>
+                <li>Optional upload to a public data repo (via GitHub Device Flow) only if you opt‑in</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Quick install (macOS)</h3>
+              <p class="meta">Run this in Terminal (macOS 11+):</p>
+              <pre class="codebox auto"><code>/bin/bash -lc 'curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'</code></pre>
+              <p class="meta" style="margin-top:6px;">The installer will generate a localhost certificate, create/update a Python venv, install dependencies, write a LaunchAgent, and start the Helper.</p>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Restart / Uninstall</h3>
+              <p class="meta"><b>Restart</b> (stop then start):</p>
+              <pre class="codebox auto"><code>launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.swefficiency.helper.plist; launchctl enable gui/$(id -u)/com.swefficiency.helper; launchctl kickstart -k gui/$(id -u)/com.swefficiency.helper</code></pre>
+              <p class="meta" style="margin-top:6px;"><b>Uninstall</b>:</p>
+              <pre class="codebox auto"><code>launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; rm -f ~/Library/LaunchAgents/com.swefficiency.helper.plist; rm -rf ~/.SWEfficiency ~/SWEfficiencyWork</code></pre>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Verify</h3>
+              <p class="meta">Health endpoint:</p>
+              <pre class="codebox auto"><code>curl -sk https://127.0.0.1:5050/api/health | cat</code></pre>
+              <p class="meta">Expected JSON (example):</p>
+              <pre class="codebox auto"><code>{"ok":true,"server":"swefficiency-helper","docker_sock":true}</code></pre>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Privacy & Security</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>Local‑only: all sensitive actions run on your machine. Listens on <code>127.0.0.1</code> with HTTPS.</li>
+                <li>HTTPS by default: a self‑signed certificate for localhost is generated and trusted locally.</li>
+                <li>CORS allowlist: by default only allows <code>https://LichanghengXJTU.github.io</code> and <code>http://localhost:8000</code>.</li>
+                <li>Docker runs with reduced privileges (no new privileges, limited CPU/memory/PIDs, no network where applicable).</li>
+                <li>No data is uploaded unless you explicitly opt‑in; only the benchmark record (workload text and metrics) is submitted, and only above a threshold.</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">HTTP API (for reference)</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li><code>GET /api/health</code> – helper health info</li>
+                <li><code>GET /api/docker/check</code> – check Docker availability</li>
+                <li><code>POST /api/bench/prepare</code> – create a job and write your workload code</li>
+                <li><code>POST /api/bench/run</code> – run Before/After and parse Mean/Std</li>
+                <li><code>POST /api/submit</code> – record a local submission (JSONL under <code>~/SWEfficiencyWork</code>)</li>
+                <li><code>POST /api/upload_run</code> – optional upload to the data repo via PR (if you opt‑in)</li>
+                <li><code>POST /api/upload/start</code> – start GitHub Device Flow auth and get a user code</li>
+                <li><code>POST /api/upload/token</code> – provide a personal token (fallback; not recommended)</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Configuration</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li><code>SWEF_ALLOWED_ORIGINS</code> – comma‑separated CORS origins (default includes <code>https://LichanghengXJTU.github.io</code>)</li>
+                <li><code>SWEF_WORK_ROOT</code> – sandbox root (default <code>~/SWEfficiencyWork</code>)</li>
+                <li><code>SWEF_DATA_REPO</code> – GitHub repo to push PRs to (default <code>LichanghengXJTU/SWEf-data</code>)</li>
+                <li><code>SWEF_DATA_PATH</code> – path inside the repo (default <code>Non_LLM_user_data</code>)</li>
+                <li><code>SWEF_GH_CLIENT_ID</code> / <code>SWEF_GH_CLIENT_SECRET</code> – GitHub Device Flow app creds (if not set, you may be asked to provide a token via <code>/api/upload/token</code>)</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Logs</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>Service stdout: <code>~/Library/Logs/swefficiency-helper.log</code></li>
+                <li>Service stderr: <code>~/Library/Logs/swefficiency-helper.err</code></li>
+              </ul>
+              <p class="meta">Follow logs:</p>
+              <pre class="codebox auto"><code>tail -f ~/Library/Logs/swefficiency-helper.log ~/Library/Logs/swefficiency-helper.err</code></pre>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Requirements</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>macOS 11+</li>
+                <li>Python 3.12 preferred (the installer will create a venv)</li>
+                <li>Docker Desktop (for running benchmarks)</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">Troubleshooting</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li>Browser says certificate is not trusted → Visit <code>https://127.0.0.1:5050/api/health</code> once and accept the local certificate.</li>
+                <li>CORS blocked → Ensure the page origin is in <code>SWEF_ALLOWED_ORIGINS</code> (default includes <code>https://LichanghengXJTU.github.io</code>). Restart the helper after changes.</li>
+                <li>GitHub upload requires token → Set <code>SWEF_GH_CLIENT_ID/SECRET</code> for Device Flow, or provide a PAT to <code>/api/upload/token</code> as a fallback.</li>
+              </ul>
+            </div>
+
+            <div class="flat-card" style="margin-top:10px;">
+              <h3 class="section-title" style="font-size:18px; margin:0 0 6px 0;">FAQ</h3>
+              <ul class="meta" style="margin:0 0 0 18px;">
+                <li><b>Does the website upload my local files?</b> No. Only the workload code you paste, metadata, and metrics are used. Actual execution happens locally in Docker.</li>
+                <li><b>Can I disable uploads entirely?</b> Yes. Do not check the “I agree to upload” option; the page will only record locally.</li>
+              </ul>
+            </div>
+
+            <div class="cta-row" style="gap:10px; margin-top:14px; justify-content:flex-start;">
+              <a class="btn" href="index.html#platforms">Back to Platforms</a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container-wide">
+      <div class="footer-bottom">
+        <p>&copy; Harvard Edge Computing Lab 2025, released under XXX License.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html> 

@@ -1,4 +1,6 @@
 /* assets/criteria_results.js */
+// This is the criteria results page, which is used to show the criteria and results of the SWEfficiency.
+// The functions here allows we can change the results in criteria_results.json and the page will be updated automatically.
 (() => {
   "use strict";
 
@@ -40,7 +42,8 @@
       card.appendChild(inner);
       deck.appendChild(card);
 
-      // 稳定初始尺寸，减少抖动
+      // This is the default size for the media
+      // TODO: if we want to change the default size, we can do it here
       media.style.width = '240px'; media.style.height = '240px';
 
       const applyMediaRatio = () => {
@@ -58,7 +61,6 @@
         media.style.width = Math.round(side) + 'px';
         media.style.height = Math.round(side) + 'px';
       };
-      // 首屏两次 raf 后再应用，避免初次布局未稳定
       requestAnimationFrame(() => requestAnimationFrame(applyMediaRatio));
       window.addEventListener('resize', applyMediaRatio);
     });
@@ -68,13 +70,13 @@
     const cards = [...deck.querySelectorAll('.card3d')];
     if (cards.length === 0) return;
     const inners = cards.map(c => c.querySelector('.card-inner'));
-    // 清理 minHeight
+    // clear minHeight
     inners.forEach(n => { if (n) n.style.minHeight = ''; });
-    // 测量每张卡内容高度（不受 3D 变换影响）
+    // measure content height (not affected by 3D transform)
     const contentHeights = inners.map(inner => inner ? inner.scrollHeight : 0);
-    const targetInner = Math.max(200, ...contentHeights); // 至少 200 的内容高度
-    const targetDeck = targetInner + 40; // 加留白
-    // 统一设置每张卡的内容最小高度与 deck 高度
+    const targetInner = Math.max(200, ...contentHeights); // at least 200px
+    const targetDeck = targetInner + 40; // add padding
+    // set minHeight for each card and deck height
     inners.forEach(inner => { if (inner) inner.style.minHeight = targetInner + 'px'; });
     deck.style.height = targetDeck + 'px';
   };

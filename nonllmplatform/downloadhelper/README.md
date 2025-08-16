@@ -1,76 +1,112 @@
-# Sweperf Helper 安装说明（macOS）
+# SWEfficiency Helper (macOS)
 
-目标
-- 一键在本机安装并常驻运行本地 Helper（127.0.0.1:5050，HTTPS），用于在浏览器端安全地触发本地 Docker 与文件操作。
-- 所有敏感操作均在本机完成；网页仅作为“遥控器”。
+A small local service that securely bridges the browser (the website) and your machine so you can run the Non‑LLM benchmark (in future: LLM benchmark) with Docker from the web UI—without uploading any local files or credentials.
 
-我们不会做的事
-- 不会上传你的仓库或文件内容到远端服务器。
-- 不会开启入站端口（仅本机 127.0.0.1）。
-- 不会持久化任何凭据（除非你明确在 helper 的工作目录中保存）。
+## What is it?
+- A FastAPI server listening on `127.0.0.1:5050` (HTTPS preferred)
+- Installed under `~/.SWEfficiency/helper` (code + Python venv)
+- Auto‑started at login via a LaunchAgent `com.SWEfficiency.helper`
+- Only accepts requests from allowed web origins (CORS)
+- Runs Docker jobs with restricted options (reduced privileges)
 
-安装准备
-- 操作系统：macOS 11+（Apple Silicon 或 Intel）
-- 需要网络下载 Python 依赖；若本机已具备 python3.12 会更快。
-- 可选：Docker Desktop（用于 docker 检查与管线运行）。
+## What does it help with?
+- 🧐 Health detection for the Non‑LLM Bench page
+- 🏆 Contribute to SWEfficienct testing journey
+- 🔍 Local Docker availability checks
+- 🚀 Prepare and run benchmark jobs (Before/After) with your workload code
+- 🔝 Optional upload to a public data repo (via GitHub Device Flow) only if you opt‑in
 
-快速开始（推荐）
-1. 打开“终端”，执行：
+## Quick install (recommended)
+Run this in Terminal (macOS 11+):
+```bash
+/bin/bash -lc 'curl -fsSL https://LichanghengXJTU.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'
 ```
-cd "$(dirname "$0")"
-bash install_helper.sh
-```
-2. 完成后访问：
-```
-https://127.0.0.1:5050/api/health
-```
-若首次访问提示证书不受信任，根据浏览器提示信任自签证书即可。
+The installer will:
+- Generate and trust a localhost TLS certificate (`~/.SWEfficiency/certs/`)
+- Create/update a Python virtual environment in `~/.SWEfficiency/helper/.venv`
+- Install dependencies
+- Write a LaunchAgent to auto‑start the Helper on login
+- Start the Helper immediately and open the health endpoint once
 
-工作原理（概述）
-- 安装脚本会：
-  - 生成并信任仅用于 localhost 的自签 TLS 证书（存于 `~/.sweperf/certs/`）。
-  - 在 `nonllmplatform/helper` 下创建 Python 虚拟环境并安装依赖。
-  - 写入并启用 LaunchAgent（`~/Library/LaunchAgents/com.sweperf.helper.plist`），实现登录自动启动与后台运行。
-  - 默认允许的跨域来源为 `https://lichanghengxjtu.github.io` 与 `http://localhost:8000`；可通过环境变量覆盖。
-
-安全性
-- 仅监听 `127.0.0.1:5050`；外部网络不可访问。
-- Docker 运行使用受限参数（CPU/内存/PIDs/无网络/降权）。
-- 沙箱目录默认为 `~/SweperfWork`，避免路径逃逸。
-
-常用命令
-- 立即重启 helper：
+## Restart / Uninstall
+- Restart (stop then start):
+```bash
+launchctl bootout gui/$(id -u)/com.SWEfficiency.helper || true; \
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.SWEfficiency.helper.plist; \
+launchctl enable gui/$(id -u)/com.sSWEfficiency.helper; \
+launchctl kickstart -k gui/$(id -u)/com.SWEfficiency.helper
 ```
-launchctl kickstart -k gui/$(id -u)/com.sweperf.helper
-```
-- 查看日志：
-```
-tail -f ~/Library/Logs/sweperf-helper.log
-```
-- 本地验证：
-```
-curl -s https://127.0.0.1:5050/api/health | cat
-curl -s https://127.0.0.1:5050/api/docker/check | cat
+- Uninstall:
+```bash
+launchctl bootout gui/$(id -u)/com.SWEfficiency.helper || true; \
+rm -f ~/Library/LaunchAgents/com.SWEfficiency.helper.plist; \
+rm -rf ~/.SWEfficiency ~/SWEfficiencyWork
 ```
 
-自定义（可选）
-- 修改允许跨域来源：
-  - 运行前设置 `SWEP_ALLOWED_ORIGINS` 环境变量，或安装后编辑 `~/Library/LaunchAgents/com.sweperf.helper.plist`。
-- 修改端口：
-  - 运行前设置 `PORT` 环境变量。
-
-卸载
+## Verify
+```bash
+curl -sk https://127.0.0.1:5050/api/health | cat
 ```
-launchctl bootout gui/$(id -u)/com.sweperf.helper || true
-rm -f ~/Library/LaunchAgents/com.sweperf.helper.plist
-rm -rf ~/.sweperf ~/SweperfWork
-rm -rf "$(cd .. && pwd)/helper/.venv"
+If you see JSON like:
+```json
+{"ok":true,"server":"SWEfficiency-helper","docker_sock":true}
+```
+you are ready to go. Then open the Non‑LLM Bench page on the website and click Retry.
+
+## Privacy & Security
+- Local‑only: all sensitive actions run on your machine. No inbound ports are exposed to the network; it only listens on `127.0.0.1`.
+- HTTPS by default: a self‑signed certificate for localhost is generated and trusted locally.
+- CORS allowlist: by default only allows `https://LichanghengXJTU.github.io` and `http://localhost:8000`. You can override via environment variables.
+- Docker runs with reduced privileges (no new privileges, with limited CPU/mem usage).
+- Helper do need network, but this is only for pulling docker images, which has limited actions.
+- No data is uploaded unless you explicitly opt‑in on the page. Even then, only the benchmark record (workload text and metrics) is submitted to the public repository, and only if the improvement is above the threshold (15%).
+
+## HTTP API (for reference)
+The website calls the following endpoints:
+- `GET /api/health` – helper health info
+- `GET /api/docker/check` – check Docker availability
+- `POST /api/bench/prepare` – create a job and write your workload code
+- `POST /api/bench/run` – run Before/After and parse Mean/Std
+- `POST /api/submit` – record a local submission (JSONL under `~/SWEfficiencyWork`)
+- `POST /api/upload_run` – optional upload to the data repo via PR (if you opt‑in)
+- `POST /api/upload/start` – start GitHub Device Flow auth and get a user code
+- `POST /api/upload/token` – provide a personal token (fallback; not recommended, we have tried our best to avoid calling this method)
+
+## Configuration
+Environment variables (set them before starting or in the LaunchAgent):
+- `SWEF_ALLOWED_ORIGINS` – comma‑separated CORS origins (default includes `https://LichanghengXJTU.github.io`)
+- `SWEF_WORK_ROOT` – sandbox root (default `~/SWEfficiencyWork`)
+- `SWEF_DATA_REPO` – GitHub repo to push PRs to (default `LichanghengXJTU/SWEf-data`)
+- `SWEF_DATA_PATH` – path inside the repo (default `Non_LLM_user_data`, just for current version)
+- `SWEF_GH_CLIENT_ID` / `SWEF_GH_CLIENT_SECRET` – GitHub Device Flow app creds (if not set, you may be asked to provide a token via `/api/upload/token`, but we have tested many times to make sure our oAuth App client id and client screte work)
+
+## Logs
+- Service stdout: `~/Library/Logs/SWEfficiency-helper.log`
+- Service stderr: `~/Library/Logs/SWEfficiency-helper.err`
+- Follow logs:
+```bash
+tail -f ~/Library/Logs/SWEfficiency-helper.log ~/Library/Logs/SWEfficiency-helper.err
 ```
 
-常见问题
-- 浏览器提示证书不安全？
-  - 这是自签本地证书，确保仅用于 `127.0.0.1/localhost`。你可以在“钥匙串访问”中将其设为“始终信任”。
-- Pages 页面连接失败（CORS）？
-  - 确保 `install_helper.sh` 执行时的默认域与你的 Pages 源一致（`https://lichanghengxjtu.github.io`）。
-- Docker 检查失败？
-  - 打开 Docker Desktop，确认 `docker version` 正常返回；稍后在页面重试。 
+## Requirements
+- macOS 11+
+- Python 3.12 preferred (the installer will create a venv)
+- Docker Desktop (for running benchmarks)
+
+## Troubleshooting
+- Browser says certificate is not trusted
+  - Visit `https://127.0.0.1:5050/api/health` once and accept the local certificate.
+- CORS blocked
+  - Ensure the page origin is in `SWEF_ALLOWED_ORIGINS` (default includes `https://LichanghengXJTU.github.io`). Restart the helper after changes.
+- GitHub upload requires token
+  - Set `SWEF_GH_CLIENT_ID/SECRET` for Device Flow, or provide a PAT to `/api/upload/token` as a fallback (outdated method).
+
+## FAQ
+- Q: Does the website upload my local files?
+  - A: No. Only the workload code you paste, metadata, and metrics are used. Actual execution happens locally in Docker.
+- Q: Can I disable uploads entirely?
+  - A: Yes. Do not check the “I agree to upload” option; the page will only record locally. 
+- Q: Can I uninstall helper anytime?
+  - A: Anytime if you want! But when if you are running a benchmark testing, we will never get result of that task.
+- Q: If I met some weird ocassions?
+  - A: Feel free to contact with us with sufficient description!

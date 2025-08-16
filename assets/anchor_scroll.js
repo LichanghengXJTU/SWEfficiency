@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  // 强制由我们接管位置恢复
+  // recover position strictly
   try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch {}
 
   const prefersReducedMotion = (() => {
@@ -27,7 +27,6 @@
     return true;
   };
 
-  // 1) 拦截站内锚点点击，改为平滑滚动并修正头部偏移
   const isSamePageHash = (a) => {
     if (!a || !a.getAttribute) return false;
     const href = a.getAttribute('href');
@@ -55,7 +54,6 @@
   };
   const clearLeaderboardFlag = () => { try { sessionStorage.removeItem('gotoPlatforms'); } catch {} };
 
-  // 2) hash 首次平滑处理（含 leaderboard→#platforms 强化校正）
   const handleInitialHash = () => {
     const hash = window.location.hash;
     if (!hash || hash.length <= 1) return false;
@@ -68,7 +66,6 @@
       lastH = h; tries++;
       if (stable || tries > 12) {
         scrollToElement(target);
-        // 若来自 leaderboard 且是 #platforms，追加多次平滑校正，确保最终落位正确
         if (fromLeaderboard() && hash === '#platforms') {
           const bumps = [200, 450, 800, 1200];
           bumps.forEach(ms => setTimeout(() => scrollToElement(target), ms));
@@ -82,7 +79,6 @@
     return true;
   };
 
-  // 3) 精确保存/恢复当前位置（按 pathname）
   const keyForPath = () => `scroll:${location.pathname}`;
   const saveScrollNow = () => {
     try {
@@ -110,7 +106,6 @@
     return null;
   };
 
-  // 用户交互即停止恢复
   let cancelRestore = false;
   const stopRestore = () => { cancelRestore = true; };
   window.addEventListener('pointerdown', stopRestore, { passive: true, once: true });

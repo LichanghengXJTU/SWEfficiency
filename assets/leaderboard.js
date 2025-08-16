@@ -1,43 +1,10 @@
 /* assets/leaderboard.js */
+// This is the leaderboard page, which is used to show the leaderboard of the SWEfficiency.
+// The functions here allows we can change the leaderboard in leaderboard.json and the page will be updated automatically.
 (() => {
   "use strict";
 
   const DATA_URL = "assets/data/leaderboard.json";
-//
-//  const FALLBACK = {
-//    criteria: [
-//      {
-//        id: "time_improvement",
-//        name: "Time Improvement",
-//        columns: ["Rank", "Agent / Model", "Language", "Tasks", "Mean Speedup", "Median Speedup"],
-//        rows: [
-//          [1, "Agent-X", "Python", 50, "1.42\u00D7", "1.30\u00D7"],
-//          [2, "Agent-Y", "C++", 50, "1.15\u00D7", "1.10\u00D7"],
-//          [3, "Agent-Z", "Mixed", 50, "1.08\u00D7", "1.05\u00D7"]
-//        ]
-//      },
-//      {
-//        id: "pass_rate",
-//        name: "Pass Rate",
-//        columns: ["Rank", "Agent / Model", "Tasks", "Pass Rate"],
-//        rows: [
-//          [1, "Agent-X", 50, "78%"],
-//          [2, "Agent-Y", 50, "65%"],
-//          [3, "Agent-Z", 50, "60%"]
-//        ]
-//      },
-//      {
-//        id: "opt_at_1",
-//        name: "Opt@1",
-//        columns: ["Rank", "Agent / Model", "Tasks", "Opt@1"],
-//        rows: [
-//          [1, "Agent-X", 50, "4.6%"],
-//          [2, "Agent-Y", 50, "3.2%"],
-//          [3, "Agent-Z", 50, "0.0%"]
-//        ]
-//      }
-//    ]
-//  };
 
   const $switcher = document.getElementById("criteria-switcher");
   const $loading  = document.getElementById("leaderboard-loading");
@@ -204,8 +171,8 @@
             }
             tr.appendChild(el("td", { className }, content));
           });
-          // 追加 ORG 列单元格（固定为 Sweperf 链接）
-          const orgLink = el("a", { attrs: { href: "index.html#overview" } }, "Sweperf");
+          // 追加 ORG 列单元格（固定为 SWEfficiency 链接）
+          const orgLink = el("a", { attrs: { href: "index.html#overview" } }, "SWEfficiency");
           tr.appendChild(el("td", {}, orgLink));
           tbody.appendChild(tr);
         });

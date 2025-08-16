@@ -1,4 +1,6 @@
 /* assets/features.js */
+// This is the features page, which is used to show the features of the SWEfficiency.
+// The functions here allows we can change the features in features.json and the page will be updated automatically.
 (() => {
   "use strict";
 

@@ -1,4 +1,6 @@
 /* assets/example.js */
+// This is the example page, which is used to show the examples of the SWEfficiency.
+// The functions here allows we can change the examples in examples.json and the page will be updated automatically.
 (() => {
   "use strict";
 
@@ -44,14 +46,14 @@
     const eDeck = document.getElementById('examples-deck');
     if (!eTabs || !eDeck) return;
 
-    // 加载 examples 配置
+    // load examples config
     const res = await fetch('assets/data/examples.json', { cache: 'no-store' });
     if (!res.ok) throw new Error(`examples.json HTTP ${res.status}`);
     const data = await res.json();
     const examples = Array.isArray(data.examples) ? data.examples : [];
     if (examples.length === 0) return;
 
-    // 渲染 tabs
+    // render tabs
     eTabs.innerHTML = '';
     examples.forEach((eg, idx) => {
       const btn = document.createElement('button');
@@ -61,7 +63,7 @@
       eTabs.appendChild(btn);
     });
 
-    // 渲染 cards
+    // render cards
     eDeck.innerHTML = '';
     examples.forEach((eg, idx) => {
       const card = document.createElement('div');
@@ -180,7 +182,7 @@
       eDeck.appendChild(card);
     });
 
-    // 3D Deck 行为
+    // 3D Deck behavior
     const cards = [...eDeck.querySelectorAll('.card3d')];
     const keys = cards.map(c => c.getAttribute('data-key'));
     let activeIdx = 0;
@@ -254,7 +256,7 @@
     eDeck.addEventListener('touchmove',   (e)=> moveDrag(e.touches[0].clientX),  {passive:true});
     eDeck.addEventListener('touchend',    (e)=> endDrag((e.changedTouches[0]||e.touches[0]||{clientX:0}).clientX));
 
-    // 绑定模型、criteria 与 score、补齐 meta 状态
+    // bind model, criteria, score, and meta status
     const updateByModel = (eg) => {
       const modelSel = document.getElementById(`${eg.id}-model-select`);
       const statusEl = document.getElementById(`${eg.id}-status`);
@@ -311,7 +313,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    // 仅首页 Examples 存在
+    // only home page Examples exists
     renderExamples().catch(err => console.error('Failed to render examples from JSON:', err));
   });
 })(); 

@@ -1,4 +1,8 @@
 # nonllmplatform/helper/helper_server.py
+# It is used to run the non-LLM benchmark and upload the results to the public repository.
+# TODO: We will update this script to be more applicable to other platforms later.  
+# TODO: We will update this script to be more applicable to other operating systems later.
+
 import os, json, pathlib, subprocess, shlex, time
 from typing import Optional, List
 from fastapi import FastAPI, Request, Body, HTTPException
@@ -10,28 +14,37 @@ from datetime import datetime
 import hashlib
 import base64, requests
 
-def env_list(name: str, default: List[str]) -> List[str]:
+def env_list(name: str, default: List[str], fallback_names: List[str] = []) -> List[str]:
     v = os.environ.get(name, "")
     if not v:
-        return default
+        for alt in fallback_names:
+            v = os.environ.get(alt, "")
+            if v:
+                break
+        if not v:
+            return default
     return [s.strip() for s in v.split(",") if s.strip()]
 
-ALLOWED_ORIGINS = env_list("SWEP_ALLOWED_ORIGINS", [
-    "https://lichanghengxjtu.github.io",   # Pages 域（不含路径）
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-])
+ALLOWED_ORIGINS = env_list(
+    "SWEF_ALLOWED_ORIGINS",
+    [
+        "https://LichanghengXJTU.github.io",   # Pages origin (no path)
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
+    fallback_names=["SWEP_ALLOWED_ORIGINS"],
+)
 
-ROOT_DIR = os.environ.get("SWEP_WORK_ROOT", str(pathlib.Path.home() / "SweperfWork"))
+ROOT_DIR = os.environ.get("SWEF_WORK_ROOT", os.environ.get("SWEP_WORK_ROOT", str(pathlib.Path.home() / "SWEfficiencyWork")))
 SUBMIT_FILE = os.path.join(ROOT_DIR, "submissions.jsonl")
-TOKEN_DIR = os.path.join(pathlib.Path.home(), ".sweperf")
+TOKEN_DIR = os.path.join(pathlib.Path.home(), ".SWEfficiency")
 TOKEN_FILE = os.path.join(TOKEN_DIR, "github_token")
 DATA_REPO = os.environ.get("SWEF_DATA_REPO", "lichanghengxjtu/SWEf-data")
 DATA_PATH = os.environ.get("SWEF_DATA_PATH", "Non_LLM_user_data")
 GH_CLIENT_ID = os.environ.get("SWEF_GH_CLIENT_ID")
 GH_CLIENT_SECRET = os.environ.get("SWEF_GH_CLIENT_SECRET")
 
-app = FastAPI(title="Sweperf Non-LLM helper")
+app = FastAPI(title="SWEfficiency Non-LLM helper")
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,7 +79,7 @@ def health(request: Request):
     return {
         "ok": True,
         "root": ROOT_DIR,
-        "server": "sweperf-helper",
+        "server": "swefficiency-helper",
         "docker_sock": os.path.exists("/var/run/docker.sock"),
         "allowed_origins": ALLOWED_ORIGINS,
     }
@@ -159,7 +172,7 @@ class BenchRunReq(BaseModel):
 MEAN_RE = re.compile(r"Mean\s*:\s*([0-9.+-Ee]+)")
 STD_RE = re.compile(r"(?:Std\s*Dev|Std)\s*:\s*([0-9.+-Ee]+)")
 
-# 解析 BEFORE/AFTER 两段输出
+# Parse BEFORE/AFTER two segments of output
 def parse_perf_two(txt: str):
     def extract(tag: str):
         start_tag = f"PERF_START:{tag}"
@@ -227,13 +240,13 @@ def bench_run(req: BenchRunReq, request: Request):
         meta = json.load(f)
     image = meta.get("image")
 
-    # 预拉取镜像（尽力而为）
+    # Pull image (try our best)
     try:
         run_cmd(f"docker pull {image}", timeout=240)
     except Exception:
         pass
 
-    # 仅一次进入容器：先 BEFORE，再 git apply，再 AFTER
+    # Only one entry into the container: BEFORE, git apply, AFTER
     mounts = [f"--mount type=bind,src={shlex.quote(workload_path)},dst=/tmp/workload.py"]
     if os.path.exists(patch_path):
         mounts.append(f"--mount type=bind,src={shlex.quote(patch_path)},dst=/tmp/patch.diff")
@@ -420,7 +433,7 @@ def upload_run(req: UploadReq, request: Request):
     if not token:
         if not (GH_CLIENT_ID and GH_CLIENT_SECRET):
             return JSONResponse({"ok": True, "uploaded": False, "needToken": True, "message": "GitHub token required. Please create a PAT with repo scope and POST it to /api/upload/token."})
-        # 若已有未完成的设备授权，直接复用，不要重复初始化以免触发限流
+        # If there is a pending device authorization, reuse it, do not re-initialize to avoid rate limiting
         if os.path.exists(DEVICE_FLOW_FILE):
             try:
                 with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:
@@ -428,7 +441,7 @@ def upload_run(req: UploadReq, request: Request):
                 verify_uri = st.get("verify_uri") or st.get("verifyUri") or "https://github.com/login/device"
                 user_code = st.get("user_code") or st.get("userCode")
                 created = int(st.get("created", 0))
-                # 简单冷却：60 秒内不再请求新 code
+                # Simple cooling: do not request new code within 60 seconds
                 if user_code and (int(time.time()) - created < 60):
                     return JSONResponse({
                         "ok": True,
@@ -449,9 +462,9 @@ def upload_run(req: UploadReq, request: Request):
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
             )
-            # 429 或 HTML 等非 JSON：返回提示，避免抛异常
+            # 429 or HTML etc. non-JSON: return hint, avoid throwing exception
             if resp.status_code == 429 or (resp.headers.get("Content-Type","" ).find("application/json") == -1):
-                # 如果有历史 code，优先返回
+                # If there is a history code, return it first
                 if os.path.exists(DEVICE_FLOW_FILE):
                     try:
                         with open(DEVICE_FLOW_FILE, "r", encoding="utf-8") as f:

@@ -1,4 +1,5 @@
 /* assets/installer.js */
+// This is the installer page, which is used to install the helper of the SWEfficiency.
 (() => {
   "use strict";
   const ENDPOINT = 'https://127.0.0.1:5050';

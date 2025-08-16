@@ -1,4 +1,6 @@
 /* assets/bench.js */
+// This is the benchmark page, which is used to run the non-LLM benchmark of the SWEfficiency.
+// We will update this doc to add the LLM benchmark and correctness checker later.
 (() => {
   "use strict";
 
@@ -29,6 +31,8 @@
     return body;
   }
 
+  // This is the function that uses three defensive measures to avoid uploading too many times
+  // This will be called by oneClickSubmit() and autoUploadOnce()
   async function autoUploadOnce(){
     const ulog = $('upload-log');
     let shouldRetry = false;

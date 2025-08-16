@@ -1,4 +1,6 @@
 /* assets/analysis.js */
+// This is the analysis page, which is used to show the analysis of the SWEfficiency.
+// The functions here allows we can change the analysis in analysis.json and the page will be updated automatically.
 (() => {
   "use strict";
 

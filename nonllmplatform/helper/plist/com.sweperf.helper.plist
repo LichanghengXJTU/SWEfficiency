@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
- "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>Label</key><string>com.sweperf.helper</string>
+  <key>Label</key><string>com.swefficiency.helper</string>
   <key>ProgramArguments</key>
   <array>
     <string>/bin/bash</string>
     <string>-lc</string>
-    <string>cd $HOME/your-repo-root/nonllmplatform/helper && ./run.sh</string>
+    <string>cd "$HELPER_DIR" && PORT=$PORT SWEF_ALLOWED_ORIGINS="${SWEF_ALLOWED_ORIGINS:-$ALLOWED_ORIGINS_DEFAULT}" ./run.sh</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
-  <key>StandardOutPath</key><string>$HOME/Library/Logs/sweperf-helper.log</string>
-  <key>StandardErrorPath</key><string>$HOME/Library/Logs/sweperf-helper.err</string>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/swefficiency-helper.log</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/swefficiency-helper.err</string>
 </dict></plist>

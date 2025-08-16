@@ -26,11 +26,9 @@ jobs:
           mkdir -p _site
           cp -R index.html leaderboard.html bench.html contact.html assets _site/
 
-          # 发布 helper 下载器
           mkdir -p _site/nonllmplatform/downloadhelper
           cp -R nonllmplatform/downloadhelper/* _site/nonllmplatform/downloadhelper/
 
-          # 发布 helper 运行文件（用于在线安装脚本拉取）
           mkdir -p _site/nonllmplatform/helper
           cp -R nonllmplatform/helper/helper_server.py _site/nonllmplatform/helper/ || true
           cp -R nonllmplatform/helper/requirements.txt _site/nonllmplatform/helper/ || true
@@ -38,7 +36,6 @@ jobs:
           mkdir -p _site/nonllmplatform/helper/plist
           cp -R nonllmplatform/helper/plist/* _site/nonllmplatform/helper/plist/ || true
 
-          # 禁用 jekyll
           touch _site/.nojekyll
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
