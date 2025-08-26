@@ -50,6 +50,9 @@ body{
 .brand-name{ font-weight:800; font-size:40px; letter-spacing:-0.6px; line-height:1.05; color: var(--crimson); }
 .brand-tagline{ color: var(--muted); font-size:20px; font-weight:600; line-height:1.2; }
 
+/* 在移除 logo 后保持抬头与原来一致的高度 */
+.hero-header .brand-block{ min-height: 80px; }
+
 .nav-links{ display:flex; gap:12px; }
 .nav-links a{ color: var(--muted); text-decoration:none; padding: 10px 12px; border-radius:10px; }
 .nav-links a.active, .nav-links a:hover{ background: var(--crimson); color:#fff; }
