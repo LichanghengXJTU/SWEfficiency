@@ -43,15 +43,12 @@ body{
   border-bottom: 1px solid rgba(16,17,20,0.08);
   box-shadow: 0 6px 24px rgba(0,0,0,0.05);
 }
-.hero-header-inner{ display:flex; align-items:center; justify-content:space-between; padding: 18px 0; min-height: 116px; }
+.hero-header-inner{ display:flex; align-items:center; justify-content:space-between; padding: 18px 0; }
 .brand-block{ display:flex; align-items:center; gap:20px; }
 .brand-logo{ width: 236px; height: 80px; object-fit: contain; border-radius: 12px; }
 .brand-text{ display:flex; flex-direction:column; }
 .brand-name{ font-weight:800; font-size:40px; letter-spacing:-0.6px; line-height:1.05; color: var(--crimson); }
 .brand-tagline{ color: var(--muted); font-size:20px; font-weight:600; line-height:1.2; }
-
-/* 在移除 logo 后保持抬头与原来一致的高度 */
-.hero-header .brand-block{ min-height: 80px; }
 
 .nav-links{ display:flex; gap:12px; }
 .nav-links a{ color: var(--muted); text-decoration:none; padding: 10px 12px; border-radius:10px; }
