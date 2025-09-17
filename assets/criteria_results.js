@@ -112,6 +112,16 @@ This suggests that current LM agents still lack the nuanced reasoning and reposi
     deck.style.height = targetDeck + 'px';
   };
 
+  // 触发 MathJax 渲染（更稳健，多次尝试）
+  function typesetDeck(deck){
+    try{
+      if (window.MathJax){
+        if (MathJax.typesetPromise) { MathJax.typesetPromise(deck ? [deck] : undefined); }
+        else if (MathJax.typeset)   { MathJax.typeset(deck ? [deck] : undefined); }
+      }
+    }catch(e){}
+  }
+
   const attachDeckInteractions = (tabs, deck, prefix) => {
     const cards = [...deck.querySelectorAll('.card3d')];
     const keys = cards.map(c => c.getAttribute('data-key'));
@@ -133,6 +143,7 @@ This suggests that current LM agents still lack the nuanced reasoning and reposi
         else card.classList.add('inactive-far','inactive');
       });
       applyDeckMaxHeight(deck);
+      typesetDeck(deck);
     };
     applyStates();
 
@@ -194,7 +205,11 @@ This suggests that current LM agents still lack the nuanced reasoning and reposi
     buildDeck(rDeck, RESULTS);
     attachDeckInteractions(rTabs, rDeck, 'res');
 
-    // 触发 MathJax 渲染
-    try { if (window.MathJax && MathJax.typeset) MathJax.typeset(); } catch (e) {}
+    // 触发 MathJax 渲染（初始化后多次尝试，提升稳定性）
+    typesetDeck(cDeck); typesetDeck(rDeck);
+    setTimeout(() => typesetDeck(cDeck), 50);
+    setTimeout(() => typesetDeck(cDeck), 250);
+    setTimeout(() => typesetDeck(rDeck), 50);
+    setTimeout(() => typesetDeck(rDeck), 250);
   });
 })(); 
