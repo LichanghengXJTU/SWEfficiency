@@ -7,7 +7,7 @@
     {
       id: 'sr', label: 'SR', title: 'Speedup Ratio (SR)',
       body: `If the patch applies successfully and all tests pass, we measure the speedup on the performance workload relative to the instance’s ground truth patch. The performance metric for our benchmark is the <b>speedup ratio</b> (SR), which measures how much faster the LM improvement is over the task instance’s original gold (expert) patch.<br/><br/>
-      We define the instance speedup ratio as \( SR = \frac{Speedup_{\\text{LM}}}{Speedup_{\\text{gold}}} \), where \( Speedup_{\\text{gold}} = \frac{T_{\\text{pre}}}{T_{\\text{post-gold-patch}}} \) and \( Speedup_{\\text{LM}} = \frac{T_{\\text{pre}}}{T_{\\text{post-LM-patch}}} \). To score a system across the entire dataset, we report the <b>harmonic mean</b> of SR across all instances. If a system does not submit a patch or submits a patch that fails correctness tests, that instance's SR is \( SR = 1/Speedup_{\\text{gold}} \) (as if no LM edit was attempted).`
+      We define the instance speedup ratio as: SR = Speedup_LM / Speedup_gold. Here, Speedup_gold = T_pre / T_post_gold_patch and Speedup_LM = T_pre / T_post_LM_patch. To score a system across the entire dataset, we report the <b>harmonic mean</b> of SR across all instances. If a system does not submit a patch or submits a patch that fails correctness tests, that instance's SR is set to 1 / Speedup_gold (as if no LM edit was attempted).`
     },
     {
       id: 'difficulty', label: 'Difficulty', title: 'Difficulty',
