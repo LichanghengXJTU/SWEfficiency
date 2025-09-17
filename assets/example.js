@@ -377,7 +377,10 @@ print("Std Dev:", statistics.stdev(runtimes))`,
 
       const meta = document.createElement('div'); meta.className='meta'; meta.setAttribute('style','margin-bottom:8px;');
       const repoLink = eg.meta && eg.meta.repo_url ? `<a href="${eg.meta.repo_url}" target="_blank" rel="noreferrer">link</a>` : '#';
-      meta.innerHTML = `tasks：${eg.meta?.task||''}<br/>instance_id: ${eg.meta?.instance_id||''} . GitHub link: ${repoLink}<br/>commit: ${eg.meta?.commit||''}`;
+      const taskText = (eg.meta && eg.meta.task) ? eg.meta.task : '';
+      const instanceText = (eg.meta && eg.meta.instance_id) ? eg.meta.instance_id : '';
+      const commitText = (eg.meta && eg.meta.commit) ? eg.meta.commit : '';
+      meta.innerHTML = `tasks：${taskText}<br/>instance_id: ${instanceText} . GitHub link: ${repoLink}<br/>commit: ${commitText}`;
 
       const grid = document.createElement('div'); grid.className='grid grid-12'; grid.setAttribute('style','gap:10px;');
 
@@ -500,5 +503,9 @@ print("Std Dev:", statistics.stdev(runtimes))`,
     window.addEventListener('resize', () => applyDeckMaxHeight(eDeck));
   };
 
-  document.addEventListener('DOMContentLoaded', renderExamples);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderExamples);
+  } else {
+    renderExamples();
+  }
 })(); 
