@@ -35,7 +35,11 @@
             <div class="container-wide">
               <h1 class="section-title" style="text-align:center; font-size:42px; letter-spacing:-0.02em; margin:0 0 16px 0;">SWE-fficiency Leaderboard</h1>
 
-              <div class="flat-card" style="margin-bottom:12px;">
+              <div style="text-align:right; margin-bottom:12px;">
+                <button id="toggle-leaderboard-btn" class="btn btn-secondary">Show: Correctness & Speedup</button>
+              </div>
+
+              <div id="overall-card" class="flat-card" style="margin-bottom:12px;">
                 <h3 class="section-title" style="font-size:20px; margin:0 0 8px 0;">Overall Speedup Ratio</h3>
                 <div class="leaderboard-table">
                   <table class="table clean-table striped" style="width:100%">
@@ -49,7 +53,7 @@
                 </div>
               </div>
 
-              <div class="flat-card">
+              <div id="correctness-card" class="flat-card" style="display:none;">
                 <h3 class="section-title" style="font-size:20px; margin:0 0 8px 0;">Correctness & Speedup</h3>
                 <div class="leaderboard-table">
                   <table class="table clean-table striped" style="width:100%">
@@ -95,6 +99,25 @@
       </div>
     </footer>
   </div>
+
+  <script>
+  (function(){
+    var btn = document.getElementById('toggle-leaderboard-btn');
+    var overall = document.getElementById('overall-card');
+    var correctness = document.getElementById('correctness-card');
+    if(!btn || !overall || !correctness) return;
+    function updateLabel(){
+      btn.textContent = (overall.style.display !== 'none') ? 'Show: Correctness & Speedup' : 'Show: Overall Speedup Ratio';
+    }
+    btn.addEventListener('click', function(){
+      var showingOverall = (overall.style.display !== 'none');
+      overall.style.display = showingOverall ? 'none' : 'block';
+      correctness.style.display = showingOverall ? 'block' : 'none';
+      updateLabel();
+    });
+    updateLabel();
+  })();
+  </script>
 </body>
 </html>
 
