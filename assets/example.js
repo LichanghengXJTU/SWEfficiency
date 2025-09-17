@@ -255,10 +255,10 @@ print("Std Dev:", statistics.stdev(runtimes))`,
 -    Return the unapplied unary predicates.
 -    """
 +    """
-+    Return every unary predicates registered to ``Q``.
++    Return every unary predicates registered to \`\`Q\`\`.
 +
 +    This function is used to generate the keys for
-+    ``generate_known_facts_dict``.
++    \`\`generate_known_facts_dict\`\`.
 +
 +    """
      exclude = set()
