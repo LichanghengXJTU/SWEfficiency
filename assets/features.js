@@ -1,58 +1,65 @@
 /* assets/features.js */
-// This is the features page, which is used to show the features of the SWEfficiency.
-// The functions here allows we can change the features in features.json and the page will be updated automatically.
+// 静态渲染 Features。第一项包含图片，图片横向居中、保持比例，文字置于图片下方。
 (() => {
   "use strict";
 
-  const loadFeatures = async () => {
-    const res = await fetch('assets/data/features.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error(`features.json HTTP ${res.status}`);
-    return res.json();
-  };
+  const FEATURES = [
+    {
+      id: 'data-collection',
+      title: 'Scientific data collection',
+      image: 'assets/images/data_pipeline.png',
+      body:
+        'We select and scrap the pull requests in 9 repositories, use 3 key attributes to filter the tasks, identify the covering correctness tests, annotate the performance workload and filter the instances according to their execution results. These procedures promise the data we collect are worthy to discuss.'
+    },
+    {
+      id: 'open-precise',
+      title: 'Open-ended but precise evaluation criteria',
+      body:
+        'Providing only the workload to be optimized as part of task formulation makes the optimization problem highly open-ended: agents can choose from a wide range of approaches, including algorithmic changes, library substitutions, memory layout optimizations, or parallelization, which mirrors the flexibility of real world problems. Spontaneously, our evaluation is made precise by grounding correctness in an explicit set of unit and integration tests, which guarantee an unambiguous criteria for functional correctness.'
+    },
+    {
+      id: 'perf-vs-corr',
+      title: 'Clear distinction between performance and correctness workloads',
+      body:
+        'We separately annotate realistic performance workloads from PR information and use static analysis tooling to identify key correctness tests for task instance construction, satisfying the software standards that the performance benchmarks are clearly separated from correctness tests.'
+    },
+    {
+      id: 'preserve-correctness',
+      title: 'Preserving correctness during optimization',
+      body:
+        'Our benchmark emphasizes the pass-to-pass setting of performance engineering: improving runtime code without introducing new behavior or breaking existing tests, which highlights a more realistic performance engineering journey that the new behaviors are rarely introduced when optimizing code but the existing functionality remains unchanged.'
+    }
+  ];
 
-  const buildFeature = (host, item, media) => {
-    // host 为 .flat-card 容器
-    host.innerHTML = '';
-    const wrap = document.createElement('div'); wrap.className = 'feat-inner';
-    const mediaBox = document.createElement('div'); mediaBox.className = 'feat-media';
-    const img = document.createElement('img'); img.alt = item.title || item.id || 'feature';
-    img.style.maxWidth = '100%'; img.style.maxHeight = '100%'; img.style.objectFit = 'contain';
-    if (item.image) img.src = (media?.basePath || '') + item.image;
-    mediaBox.appendChild(img);
-
-    const title = document.createElement('div'); title.className = 'feat-title'; title.textContent = item.title || '';
-    const body = document.createElement('div'); body.className = 'feat-body'; body.textContent = item.body || '';
-
-    // 右上浮动媒体 + 文本绕排
-    wrap.appendChild(mediaBox); wrap.appendChild(title); wrap.appendChild(body);
-    host.appendChild(wrap);
-
-    const applyMediaSize = () => {
-      const rect = host.getBoundingClientRect();
-      let sideFromRatio = null;
-      if (rect.width > 0 && rect.height > 0) {
-        const ratio = (typeof item.ratio === 'number' && item.ratio > 0 && item.ratio < 1) ? item.ratio : (media?.defaultRatio || 0.25);
-        const area = rect.width * rect.height;
-        const targetArea = area * ratio;
-        sideFromRatio = Math.sqrt(targetArea);
-      }
-      let side = sideFromRatio != null ? sideFromRatio : (media?.minSide || 120);
-      if (typeof media?.minSide === 'number') side = Math.max(side, media.minSide);
-      if (typeof media?.maxSide === 'number') side = Math.min(side, media.maxSide);
-      mediaBox.style.width = Math.round(side) + 'px';
-      mediaBox.style.height = Math.round(side) + 'px';
-    };
-    requestAnimationFrame(applyMediaSize);
-    window.addEventListener('resize', applyMediaSize);
-  };
-
-  const render = async () => {
-    const data = await loadFeatures();
+  const render = () => {
     const cards = document.querySelectorAll('.features-grid .flat-card');
-    const items = data.items || [];
-    cards.forEach((card, idx) => {
-      const item = items[idx] || { title: 'Feature', body: 'tbu', image: '' };
-      buildFeature(card, item, data.media || {});
+    if (!cards || cards.length === 0) return;
+    FEATURES.forEach((item, idx) => {
+      const host = cards[idx];
+      if (!host) return;
+      host.innerHTML = '';
+      const wrap = document.createElement('div'); wrap.className = 'feat-inner';
+
+      if (idx === 0 && item.image) {
+        // 第一项：图片横向居中 + 文字在下方
+        const fig = document.createElement('figure');
+        fig.style.margin = '0'; fig.style.textAlign = 'center';
+        const img = document.createElement('img');
+        img.src = item.image; img.alt = item.title; img.style.maxWidth = '100%'; img.style.height = 'auto';
+        fig.appendChild(img);
+        const cap = document.createElement('figcaption');
+        cap.className = 'img-caption'; cap.textContent = '';
+        fig.appendChild(cap);
+        wrap.appendChild(fig);
+        const title = document.createElement('div'); title.className = 'feat-title'; title.textContent = item.title;
+        const body = document.createElement('div'); body.className = 'feat-body'; body.textContent = item.body;
+        wrap.appendChild(title); wrap.appendChild(body);
+      } else {
+        const title = document.createElement('div'); title.className = 'feat-title'; title.textContent = item.title;
+        const body = document.createElement('div'); body.className = 'feat-body'; body.textContent = item.body;
+        wrap.appendChild(title); wrap.appendChild(body);
+      }
+      host.appendChild(wrap);
     });
   };
 

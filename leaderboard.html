@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SWEfficiency Leaderboard</title>
-  <meta name="description" content="SWEfficiency leaderboard with clean criteria switching and modern design."/>
+  <title>SWE-fficiency Leaderboard</title>
+  <meta name="description" content="SWE-fficiency leaderboard with hard-coded results."/>
   <link rel="stylesheet" href="assets/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -13,14 +13,11 @@
 </head>
 <body>
   <div class="page-shell">
-    <!-- TODO: This is our navigation links -->
     <header class="hero-header">
       <div class="container-wide hero-header-inner">
         <div class="brand-block">
           <div class="brand-logo" aria-hidden="true"></div>
-          <div class="brand-text">
-            <div class="brand-name">SWEfficiency</div>
-          </div>
+          <div class="brand-text"><div class="brand-name">SWE-fficiency</div></div>
         </div>
         <nav class="nav-links">
           <a href="index.html#overview">Overview</a>
@@ -34,76 +31,70 @@
     <main>
       <div class="container-wide">
         <div class="page-card">
-          <!-- TODO: This is our leaderboard -->
-                <section class="section">
-        <div class="container-wide">
-          <h1 class="section-title" style="text-align:center; font-size:42px; letter-spacing:-0.02em; margin:0 0 20px 0;">SWEfficiency Leaderboard</h1>
+          <section class="section">
+            <div class="container-wide">
+              <h1 class="section-title" style="text-align:center; font-size:42px; letter-spacing:-0.02em; margin:0 0 16px 0;">SWE-fficiency Leaderboard</h1>
 
-          <!-- TODO: This is our KPI, please change it to the actual KPI in /assets/data/leaderboard.json -->
-          <div class="kpi-strip" style="margin:25px 0 25px 0;">
-            <!-- TODO: This is our total tasks, please change it to the actual total tasks in the future -->
-            <div class="kpi-pill"><span>Total Tasks</span><span class="val">tbu</span></div>
-            <!-- TODO: This is our models, please change it to the actual models in the future -->
-            <div class="kpi-pill"><span>Models</span><span class="val">tbu</span></div>
-            <!-- TODO: This is our updated, please change it to the actual updated in the future -->
-            <div class="kpi-pill"><span>Updated</span><span class="val">tbu</span></div>
-          </div>
-
-          <!-- TODO: This is our criteria switcher-->
-          <div style="margin-bottom:25px; display:flex; align-items:center; gap:20px; justify-content:space-between; flex-wrap:wrap;">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <div id="criteria-switcher" class="segmented-control" role="tablist" aria-label="Leaderboard criteria"></div>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <div id="leaderboard-model-wrap" style="position:relative; display:inline-block;">
-                <input id="leaderboard-model-filter" type="text" placeholder="Search model…" style="padding:8px 28px 8px 10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font: inherit;"/>
-                <span id="leaderboard-model-ghost" aria-hidden="true" style="position:absolute; left:12px; top:50%; transform: translateY(-50%); color: rgba(0,0,0,0.35); pointer-events:none; font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
-                <button id="leaderboard-model-clear" type="button" aria-label="Clear" title="Clear" style="position:absolute; right:6px; top:50%; transform: translateY(-50%); background:transparent; border:0; cursor:pointer; color: rgba(0,0,0,0.45); font-size:16px; line-height:1;">×</button>
+              <div class="flat-card" style="margin-bottom:12px;">
+                <h3 class="section-title" style="font-size:20px; margin:0 0 8px 0;">Overall Speedup Ratio</h3>
+                <div class="leaderboard-table">
+                  <table class="table clean-table striped" style="width:100%">
+                    <thead><tr><th>System</th><th>Speedup Ratio</th></tr></thead>
+                    <tbody>
+                      <tr><td>Claude 3.7 Sonnet (OpenHands)</td><td class="num">0.010×</td></tr>
+                      <tr><td>GPT-5 Mini (OpenHands)</td><td class="num">0.005×</td></tr>
+                      <tr><td>Gemini 2.5 Flash (OpenHands)</td><td class="num">0.002×</td></tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <select id="leaderboard-criteria-select" aria-label="Select criteria" style="padding:8px 10px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font: inherit;"></select>
+
+              <div class="flat-card">
+                <h3 class="section-title" style="font-size:20px; margin:0 0 8px 0;">Correctness & Speedup</h3>
+                <div class="leaderboard-table">
+                  <table class="table clean-table striped" style="width:100%">
+                    <thead>
+                      <tr>
+                        <th>System</th>
+                        <th>Fails Tests</th>
+                        <th>Slower than Pre-edit</th>
+                        <th>Faster than Pre-edit</th>
+                        <th>Faster than Expert</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>Claude 3.7 Sonnet (OpenHands)</td><td class="num">36%</td><td class="num">13%</td><td class="num">29%</td><td class="num">22%</td></tr>
+                      <tr><td>GPT 5 Mini (OpenHands)</td><td class="num">51%</td><td class="num">10%</td><td class="num">24%</td><td class="num">15%</td></tr>
+                      <tr><td>Gemini 2.5 Flash (OpenHands)</td><td class="num">44%</td><td class="num">14%</td><td class="num">32%</td><td class="num">10%</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
             </div>
-          </div>
+          </section>
 
-          <!-- TODO: This is our loading state -->
-          <div class="leaderboard-loading" id="leaderboard-loading">
-            <div class="spinner"></div>
-            <span>Loading leaderboard…</span>
-          </div>
-
-          <!-- TODO: This is our leaderboard table -->
-          <div class="no-codeframe leaderboard-card fade-enter" id="leaderboard-card" style="display:none;">
-            <div id="leaderboard-table" class="leaderboard-table"></div>
-          </div>
-        </div>
-      </section>
-
-        <!-- TODO: This is our contribute section -->
-        <section class="section">
-          <div class="container-wide">
-            <div class="contribute-card elevate">
-              <h3 style="margin:0 0 6px 0;">Contribute</h3>
-              <p class="muted" style="margin:0 0 10px 0;">If you would like to contribute to SWEfficiency, please consider our platform.</p>
-              <a class="btn btn-secondary" href="index.html#platforms" onclick="try{sessionStorage.setItem('gotoPlatforms','1')}catch(e){}">Go to Platforms</a>
+          <section class="section">
+            <div class="container-wide">
+              <div class="contribute-card elevate">
+                <h3 style="margin:0 0 6px 0;">Contribute</h3>
+                <p class="muted" style="margin:0 0 10px 0;">If you would like to contribute to SWE-fficiency, please consider our platform.</p>
+                <a class="btn btn-secondary" href="index.html#platforms" onclick="try{sessionStorage.setItem('gotoPlatforms','1')}catch(e){}">Go to Platforms</a>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
       <div class="container-wide">
         <div class="footer-bottom">
-          <p>&copy; Harvard Edge Computing Lab 2025, released under XXX License.</p>
-          <!-- TODO: Add License -->
+          <p>&copy; SWE-fficiency 2025. All rights reserved.</p>
         </div>
       </div>
     </footer>
   </div>
-
-  <!-- TODO: This is our dynamic rendering script -->
-  <script src="assets/leaderboard.js"></script>
 </body>
 </html>
 

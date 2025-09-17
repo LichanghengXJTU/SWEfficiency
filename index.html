@@ -4,12 +4,14 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!-- TODO: This is our title -->
-  <title>SWEfficiency — Benchmarking Software Performance Improvements</title>
-  <meta name="description" content="SWEfficiency: a modern benchmark and website for evaluating software performance improvements by SWE agents."/>
+  <title>SWE-fficiency — a benchmark for repository-level performance optimization</title>
+  <meta name="description" content="SWE-fficiency: a benchmark for evaluating repository-level performance optimization on real workloads."/>
   <link rel="stylesheet" href="assets/style.css"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <!-- MathJax for LaTeX formulas -->
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -19,7 +21,7 @@
         <div class="brand-logo" aria-hidden="true"></div>
         <div class="brand-text">
           <!-- TODO: This is our brand name -->
-          <div class="brand-name">SWEfficiency</div>
+          <div class="brand-name">SWE-fficiency</div>
         </div>
       </div>
       <nav class="nav-links">
@@ -36,22 +38,18 @@
     <div class="container-wide">
       <div class="page-card flat">
 
-        <section class="section" style="padding-top: 8px;">
+        <section class="section" style="padding-top: 8px;" id="overview">
       <div class="container-wide">
             <div class="hero-headline floating">
               <!-- TODO: This is our title -->
-              <div class="brand">SWEfficiency:</div>
+              <div class="brand">SWE-fficiency</div>
               <!-- TODO: This is our description -->
-              <div class="desc">Evaluate performance improvements of human-written and LLM-generated patches on real-world tasks</div>
-              <!-- TODO: This is our authors -->
+              <div class="desc">a benchmark for evaluating repository-level performance optimization on real workloads</div>
               <div class="brand-authors" style="font-weight:600; color:#6a7079;">Authors</div>
               <div class="hero-surface" aria-hidden="true"></div>
               <div class="cta-row">
-                <!-- TODO: This is our GitHub link, please change it to the final link -->
                 <a href="https://github.com/LichanghengXJTU/SWEfficiency" class="btn btn-dark">GitHub<span class="arrow">→</span></a>
-                <!-- TODO: This is our paper link, please change it to the actual link -->
                 <a href="#" class="btn btn-crimson">Paper<span class="arrow">→</span></a>
-                <!-- TODO: This is our dataset link, please change it to the actual link -->
                 <a href="#" class="btn btn-light">Dataset<span class="arrow">→</span></a>
               </div>
             </div>
@@ -62,41 +60,56 @@
         <section class="section">
           <div class="container-wide">
             <h3 class="section-title" style="font-size:22px; margin:0 0 10px 0;">Our work</h3>
-            <div class="grid grid-12">
+            <div class="grid grid-12" style="gap:12px; align-items:stretch;">
               <div class="col-7 col-12-sm">
-                <!-- TODO: This is our mind map, please change it to the actual mind map -->
-                <div class="placeholder-mm md">Mind map placeholder</div>
+                <div class="media-frame" style="background:#fff;">
+                  <img src="assets/images/swefficiency_overview.png" alt="SWE-fficiency overview" style="background:#fff;"/>
+                </div>
               </div>
               <div class="col-5 col-12-sm">
-                <!-- TODO: This is our overview text, please change it to the actual overview text -->
-                <div class="placeholder lg">Placeholder</div>
+                <div class="flat-card" style="height:100%;">
+                  <div class="preline" style="white-space:pre-line;">
+Optimizing large-scale software repositories requires more than correctness—it demands runtime efficiency while preserving correctness. To compensate for existing benchmarks primarily assessing whether code works, we introduce SWE-fficiency, which focuses on improvement of runtime.
+
+498 optimization tasks collected from nine widely used repositories spanning data science, machine learning, and high-performance computing are included. In each task, given a complete codebase and a “slow” workload, an agent must investigate code semantics, localize bottlenecks and relevant tests, and produce a patch that aims to speedup the codebase while passing the same unit tests. Our automated pipeline scrapes GitHub pull requests for performance-improving edits, combining keyword filtering, static analysis, coverage tooling, and dynamic validation to both confirm expert speedup baselines and identify relevant repository correctness tests.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Performance, Measured. -->
+        <!-- Contributions (replace KPI) -->
         <section class="section">
           <div class="container-wide">
-            <h3 class="section-title" style="margin:0 0 6px 0;">Performance, Measured.</h3>
+            <h3 class="section-title" style="margin:0 0 6px 0;">Contributions</h3>
             <div class="divider"></div>
-            <div class="kpi-row">
-              <!-- TODO: This is our tasks number, please change it to the actual tasks number -->
-              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Tasks</div></div>
-              <!-- TODO: This is our agents / models number, please change it to the actual agents / models number -->
-              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Agents / Models</div></div>
-              <!-- TODO: This is our best mean speedup, please change it to the actual best mean speedup -->
-              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Best Mean Speedup</div></div>
-              <!-- TODO: This is our best pass rate, please change it to the actual best pass rate -->
-              <div class="kpi-card"><div class="kpi-value">tbu</div><div class="kpi-label">Best Pass Rate</div></div>
-        </div>
-      </div>
-    </section>
+            <div class="grid grid-12" style="gap:12px;">
+              <div class="col-4 col-12-sm">
+                <div class="flat-card">
+                  <div class="section-title" style="font-size:18px; margin:0 0 6px 0;">COMPLETE PIPELINE</div>
+                  <div class="meta preline">A systematic pipeline for extracting realistic and reproducible performance engineering tasks from real-world repos, yielding the SWE-fficiency benchmark.</div>
+                </div>
+              </div>
+              <div class="col-4 col-12-sm">
+                <div class="flat-card">
+                  <div class="section-title" style="font-size:18px; margin:0 0 6px 0;">EVALUATION & DISCRIMINATION</div>
+                  <div class="meta preline">Evaluation of leading LM agents on SWE-fficiency, observing a significant gap between expert performance and LMs.</div>
+                </div>
+              </div>
+              <div class="col-4 col-12-sm">
+                <div class="flat-card">
+                  <div class="section-title" style="font-size:18px; margin:0 0 6px 0;">QUALITATIVE ANALYSIS</div>
+                  <div class="meta preline">Qualitative analysis of LM agent behavior and actionable insights for future research and agent improvements. We release the benchmark and pipeline to catalyze research on automated performance engineering and long-horizon software reasoning.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <!-- Features -->
         <section class="section">
       <div class="container-wide">
-        <!-- TODO: This is our features, please change it to the actual features in /assets/data/features.json -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Features</h3>
         <div class="grid grid-12 features-grid">
               <div class="col-3 col-12-sm"><div class="flat-card"></div></div>
@@ -107,20 +120,18 @@
           </div>
         </section>
 
-        <!-- Criteria with 3D Deck -->
+        <!-- Criteria (static, SR & Difficulty) -->
         <section class="section">
           <div class="container-wide">
-            <!-- TODO: This is our criteria, please change it to the actual criteria in /assets/data/criteria_results.json -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Criteria</h3>
             <div class="tabbar" id="criteria-tabs"></div>
             <div class="results-deck" id="criteria-deck"></div>
           </div>
         </section>
 
-        <!-- Results: changeable cards -->
+        <!-- Results: 4 cards (hard-coded) -->
         <section class="section">
           <div class="container-wide">
-            <!-- TODO: This is our results, please change it to the actual results in /assets/data/criteria_results.json -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Results</h3>
             <div class="tabbar" id="results-tabs"></div>
             <div class="tab-panels" id="results-panels">
@@ -129,19 +140,17 @@
           </div>
         </section>
 
-        <!-- Analysis: dynamic rendering (assets/analysis.js + assets/data/analysis.json) -->
+        <!-- Analysis -->
         <section class="section">
           <div class="container-wide">
-            <!-- TODO: This is our analysis, please change it to the actual analysis in /assets/data/analysis.json -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Analysis</h3>
             <div class="analysis-list" id="analysis-list"></div>
           </div>
         </section>
 
-        <!-- Examples: five flipable large cards (same as Criteria/Results) -->
+        <!-- Examples -->
         <section class="section">
           <div class="container-wide">
-            <!-- TODO: This is our examples, please change it to the actual examples in /assets/data/examples.json -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Examples</h3>
             <div class="tabbar" id="examples-tabs"></div>
             <div class="results-deck" id="examples-deck"></div>
@@ -151,7 +160,6 @@
         <!-- Run SWEfficiency -->
         <section class="section">
           <div class="container-wide">
-            <!-- TODO: This is our run SWEfficiency, please add the description and code here in the future -->
             <h3 class="section-title" style="margin:0 0 10px 0;">Run SWEfficiency</h3>
             <div class="grid grid-12" style="gap:10px;">
               <div class="col-6 col-12-sm">
@@ -194,7 +202,7 @@ placeholder line 3</code></pre>
                   <div class="meta" style="margin-top:10px; font-weight:600;">1) Download helper (macOS):</div>
                   <div class="meta">One‑line install and run the local Helper (HTTPS, 127.0.0.1:5050). Use the code below to install the helper when you never installed it before or uninstalled it.</div>
                   <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -lc &apos;curl -fsSL https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash&apos;</code></pre>
+                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-install">/bin/bash -lc 'curl -fsSL https://lichanghengxjtu.github.io/SWEfficiency/nonllmplatform/downloadhelper/install_helper.sh | bash'</code></pre>
                     <button class="btn btn-tertiary" type="button" data-copy-target="code-install">Copy</button>
                   </div>
 
@@ -208,7 +216,7 @@ placeholder line 3</code></pre>
                   <div class="meta" style="margin-top:14px; font-weight:600;">3) Uninstall helper:</div>
                   <div class="meta">Stop the LaunchAgent and remove installed files and work dir. Use the code below to uninstall the helper when you want to uninstall it. Remember to run this code when you no longer need to benchmark on SWEfficiency.</div>
                   <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id -u)/com.swefficiency.helper || true; rm -f ~/Library/LaunchAgents/com.swefficiency.helper.plist; rm -rf ~/.SWEfficiency ~/SWEfficiencyWork</code></pre>
+                    <pre class="codebox auto" style="flex:1; margin:0;"><code id="code-uninstall">launchctl bootout gui/$(id - u)/com.swefficiency.helper || true; rm -f ~/Library/LaunchAgents/com.swefficiency.helper.plist; rm -rf ~/.SWEfficiency ~/SWEfficiencyWork</code></pre>
                     <button class="btn btn-tertiary" type="button" data-copy-target="code-uninstall">Copy</button>
                   </div>
 
@@ -228,9 +236,7 @@ placeholder line 3</code></pre>
   <footer id="contact" class="footer">
     <div class="container-wide">
       <div class="footer-bottom">
-        <!-- TODO: This is our copyright information -->
-        <p>&copy; SWEfficiency 2025. All rights reserved.</p>
-        <!-- TODO: This is our license information, please change it to the actual license information -->
+        <p>&copy; SWE-fficiency 2025. All rights reserved.</p>
       </div>
     </div>
   </footer>

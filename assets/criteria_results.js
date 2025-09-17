@@ -1,14 +1,76 @@
 /* assets/criteria_results.js */
-// This is the criteria results page, which is used to show the criteria and results of the SWEfficiency.
-// The functions here allows we can change the results in criteria_results.json and the page will be updated automatically.
+// 静态渲染 Criteria（SR, Difficulty）与 Results（4 卡片）。
 (() => {
   "use strict";
 
-  const loadCR = async () => {
-    const res = await fetch('assets/data/criteria_results.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error(`criteria_results.json HTTP ${res.status}`);
-    return res.json();
-  };
+  const CRITERIA = [
+    {
+      id: 'sr', label: 'SR', title: 'Speedup Ratio (SR)',
+      body: `If the patch applies successfully and all tests pass, we measure the speedup on the performance workload relative to the instance’s ground truth patch. The performance metric for our benchmark is the <b>speedup ratio</b> (SR), which measures how much faster the LM improvement is over the task instance’s original gold (expert) patch.<br/><br/>
+      We define the instance speedup ratio as \( SR = \frac{Speedup_{\\text{LM}}}{Speedup_{\\text{gold}}} \), where \( Speedup_{\\text{gold}} = \frac{T_{\\text{pre}}}{T_{\\text{post-gold-patch}}} \) and \( Speedup_{\\text{LM}} = \frac{T_{\\text{pre}}}{T_{\\text{post-LM-patch}}} \). To score a system across the entire dataset, we report the <b>harmonic mean</b> of SR across all instances. If a system does not submit a patch or submits a patch that fails correctness tests, that instance's SR is \( SR = 1/Speedup_{\\text{gold}} \) (as if no LM edit was attempted).`
+    },
+    {
+      id: 'difficulty', label: 'Difficulty', title: 'Difficulty',
+      body: `We identify three task difficulty measures that describe intuition behind how “difficult” a task is: (1) pre-edit workload runtime, or the duration of the workload to be optimized (longer workloads likely require more algorithmic insight); (2) gold patch length, or the number of lines in the expert (gold) edit associated with each task instance (harder instances require larger line-wise expert edits); and (3) the speedup factor that the expert edit achieved (instance is harder if expert speedup is larger).`
+    }
+  ];
+
+  const RESULTS = [
+    {
+      id: 'overall', label: 'Overall', title: 'Overall Speedup',
+      body: `
+      <div class="leaderboard-table" style="margin-bottom:8px;">
+        <table class="table clean-table striped" style="width:100%">
+          <thead><tr><th>System</th><th>Speedup Ratio</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sc">Claude 3.7 Sonnet (OpenHands)</span></td><td class="num">0.010×</td></tr>
+            <tr><td><span class="sc">GPT-5 Mini (OpenHands)</span></td><td class="num">0.005×</td></tr>
+            <tr><td><span class="sc">Gemini 2.5 Flash (OpenHands)</span></td><td class="num">0.002×</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="preline">We observe that LM agents fail to consistently match 0.01 times of expert level performance. We observe a substantial capability transfer gap: GPT-5 Mini (OpenHands) achieved 0.005 times of expert performance..
+
+Our results indicate that current agents, while successful on SWE-style issue resolution and bug-fix tasks, currently do not transfer to efficiency-oriented, measurement-grounded program changes, underscoring substantial headroom and the need for new approaches towards more autonomous performance engineering.</div>`
+    },
+    {
+      id: 'bugs', label: 'Bugs', title: 'Bugs introduced when optimizing',
+      body: `
+      <div class="leaderboard-table" style="margin-bottom:8px;">
+        <table class="table clean-table striped" style="width:100%">
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>Fails Tests</th>
+              <th>Slower than Pre-edit</th>
+              <th>Faster than Pre-edit</th>
+              <th>Faster than Expert</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Claude 3.7 Sonnet (OpenHands)</td><td class="num">36%</td><td class="num">13%</td><td class="num">29%</td><td class="num">22%</td></tr>
+            <tr><td>GPT 5 Mini (OpenHands)</td><td class="num">51%</td><td class="num">10%</td><td class="num">24%</td><td class="num">15%</td></tr>
+            <tr><td>Gemini 2.5 Flash (OpenHands)</td><td class="num">44%</td><td class="num">14%</td><td class="num">32%</td><td class="num">10%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="preline">We find that leading systems most often produce patches that break functional correctness and cause tests to fail, invalidating any optimizations made. Even when producing correct patches, the majority of edits are either slower than the original, pre-edit repository state or faster but still slower than the expert edit. Strikingly, fewer than a quarter of correct solutions outperform expert-level baselines, and in some cases agents make changes that degrade performance.
+
+This suggests that current LM agents still lack the nuanced reasoning and repository understanding skill required for bug-free performance optimizations, highlighting the opportunity for future work in developing agents that can jointly reason about correctness and computational efficiency.</div>`
+    },
+    {
+      id: 'easywins', label: 'EasyWins', title: 'Stronger on easy wins but weak on harder speedups',
+      body: `
+      <figure class="img-block" style="margin:0 0 8px 0;">
+        <img src="assets/images/hsr_thresholds_bins_markers_centered.png" alt="HSR thresholds by bins" style="width:100%; height:auto;"/>
+        <figcaption class="img-caption">This figure shows a breakdown of LM benchmark performance and correlation with multiple task difficulty measures. Across all three measures of task complexity, we observe that LMs are able to match or come close to matching expert performance on lower-complexity tasks. However, LMs struggle to solve optimization tasks as they become longer in duration and have more substantial feasible speedup opportunities.</figcaption>
+      </figure>`
+    },
+    {
+      id: 'misloc', label: 'Misloc', title: 'Function-level mislocalization severely limits LM performance',
+      body: `We identify that a significant part of under-performance of LM agents can be attributed to rarely editing functions that contribute most to the expert's speedup. When imagining the expert (gold) patch speedup gains as units of “speedup mass” distributed across files (and, within them, regions/functions), we find that 70.4% of the expert’s speedup gain occurred in functions the LM never touched: 40% of the missed speedup is attributed to not choosing the right file, while 30.4% is due to choosing the wrong function in the right file. Although the LM and expert commonly edit the same files overall (on average, their edited-file sets overlap by 61%), the function level overlap is not concentrated on the files that actually carry most of the expert’s speedup.`
+    }
+  ];
 
   const buildTabs = (container, items, prefix) => {
     container.innerHTML = '';
@@ -21,7 +83,7 @@
     });
   };
 
-  const buildDeck = (deck, items, mediaBasePath, defaultRatio=0.25, minSide, maxSide) => {
+  const buildDeck = (deck, items) => {
     deck.innerHTML = '';
     items.forEach((it, idx) => {
       const card = document.createElement('div');
@@ -30,39 +92,11 @@
       const inner = document.createElement('div'); inner.className = 'card-inner';
       const content = document.createElement('div'); content.className = 'card-content';
       const title = document.createElement('div'); title.className = 'card-title'; title.textContent = it.title || it.id;
-      const body = document.createElement('div'); body.className = 'card-body'; body.textContent = it.body || '';
+      const body = document.createElement('div'); body.className = 'card-body'; body.innerHTML = it.body || '';
       content.appendChild(title); content.appendChild(body);
-      const media = document.createElement('div'); media.className = 'card-media';
-      const img = document.createElement('img');
-      img.alt = it.title || it.id;
-      img.style.maxWidth = '100%'; img.style.maxHeight = '100%'; img.style.objectFit = 'contain';
-      if (it.image) img.src = (mediaBasePath || '') + it.image;
-      media.appendChild(img);
-      inner.appendChild(media); inner.appendChild(content);
+      inner.appendChild(content);
       card.appendChild(inner);
       deck.appendChild(card);
-
-      // This is the default size for the media
-      // TODO: if we want to change the default size, we can do it here
-      media.style.width = '240px'; media.style.height = '240px';
-
-      const applyMediaRatio = () => {
-        const rect = inner.getBoundingClientRect();
-        let sideFromRatio = null;
-        if (rect.width > 0 && rect.height > 0) {
-          const ratio = (typeof it.ratio === 'number' && it.ratio > 0 && it.ratio < 1) ? it.ratio : defaultRatio;
-          const area = rect.width * rect.height;
-          const targetArea = area * ratio;
-          sideFromRatio = Math.sqrt(targetArea);
-        }
-        let side = sideFromRatio != null ? sideFromRatio : (minSide || 180);
-        if (typeof minSide === 'number') side = Math.max(side, minSide);
-        if (typeof maxSide === 'number') side = Math.min(side, maxSide);
-        media.style.width = Math.round(side) + 'px';
-        media.style.height = Math.round(side) + 'px';
-      };
-      requestAnimationFrame(() => requestAnimationFrame(applyMediaRatio));
-      window.addEventListener('resize', applyMediaRatio);
     });
   };
 
@@ -70,13 +104,10 @@
     const cards = [...deck.querySelectorAll('.card3d')];
     if (cards.length === 0) return;
     const inners = cards.map(c => c.querySelector('.card-inner'));
-    // clear minHeight
     inners.forEach(n => { if (n) n.style.minHeight = ''; });
-    // measure content height (not affected by 3D transform)
     const contentHeights = inners.map(inner => inner ? inner.scrollHeight : 0);
-    const targetInner = Math.max(200, ...contentHeights); // at least 200px
-    const targetDeck = targetInner + 40; // add padding
-    // set minHeight for each card and deck height
+    const targetInner = Math.max(240, ...contentHeights);
+    const targetDeck = targetInner + 40;
     inners.forEach(inner => { if (inner) inner.style.minHeight = targetInner + 'px'; });
     deck.style.height = targetDeck + 'px';
   };
@@ -99,7 +130,6 @@
         else if (order === 2) card.classList.add('state-next-2','inactive');
         else if (order === cards.length - 2) card.classList.add('state-prev-2','inactive');
         else if (order === 3) card.classList.add('state-next-3','inactive');
-        else if (order === cards.length - 3) card.classList.add('state-prev-3','inactive');
         else card.classList.add('inactive-far','inactive');
       });
       applyDeckMaxHeight(deck);
@@ -149,34 +179,22 @@
     window.addEventListener('resize', () => applyDeckMaxHeight(deck));
   };
 
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
     const cTabs = document.getElementById('criteria-tabs');
     const cDeck = document.getElementById('criteria-deck');
     const rTabs = document.getElementById('results-tabs');
     const rDeck = document.getElementById('results-deck');
     if (!(cTabs && cDeck && rTabs && rDeck)) return;
-    const data = await loadCR();
 
-    buildTabs(cTabs, data.criteria, 'res');
-    buildDeck(
-      cDeck,
-      data.criteria.map(c => ({ id: c.id, body: c.body, title: c.title, image: c.image, ratio: c.ratio })),
-      data.media?.criteriaBasePath,
-      data.media?.defaultRatio,
-      data.media?.minSide,
-      data.media?.maxSide
-    );
+    buildTabs(cTabs, CRITERIA, 'res');
+    buildDeck(cDeck, CRITERIA);
     attachDeckInteractions(cTabs, cDeck, 'res');
 
-    buildTabs(rTabs, data.results, 'res');
-    buildDeck(
-      rDeck,
-      data.results.map(c => ({ id: c.id, body: c.body, title: c.title, image: c.image, ratio: c.ratio })),
-      data.media?.resultsBasePath,
-      data.media?.defaultRatio,
-      data.media?.minSide,
-      data.media?.maxSide
-    );
+    buildTabs(rTabs, RESULTS, 'res');
+    buildDeck(rDeck, RESULTS);
     attachDeckInteractions(rTabs, rDeck, 'res');
+
+    // 触发 MathJax 渲染
+    try { if (window.MathJax && MathJax.typeset) MathJax.typeset(); } catch (e) {}
   });
 })(); 

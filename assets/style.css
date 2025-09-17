@@ -460,3 +460,9 @@ body{ overflow-anchor: auto; }
 /* Error log boxes sizing within result containers */
 #before-log, #after-log{ max-height: 360px; overflow: auto; }
 @media (max-width: 960px){ #before-log, #after-log{ max-height: 300px; } }
+
+/* assets/style.css additions for diffs & captions */
+.img-caption{ color:#6a7079; font-size:12px; margin-top:6px; }
+.img-block img{ display:block; width:100%; height:auto; }
+.diff-add{ color:#0a7a3e; background:#eefbf3; }
+.diff-del{ color:#b11b1b; background:#fff1f1; }
